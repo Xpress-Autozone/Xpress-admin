@@ -20,7 +20,6 @@ const MainLayout = () => {
                 <Route path="/" element={<Home/>} />
                 <Route path="/login" element={<LoginPage/>} />
                 <Route path="/home/*" element={<Home/>} />
-                <Route path="/add-products" element={<AddProduct/>} />
             </Routes>
         </BrowserRouter>
     );

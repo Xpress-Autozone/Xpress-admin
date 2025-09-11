@@ -33,7 +33,7 @@ function Home() {
                 <Route path="/exhaust-systems" element={<ExhaustSystems />} />
                 <Route path="/interior-accessories" element={<InteriorAccessories />} />
                 <Route path="/exterior-accessories" element={<ExteriorAccessories />} />
-                <Route path="/add-products" element={<Navigate to="/add-products"/>} />
+                <Route path="/add-products" element={<AddProduct/>} />
             </Routes>
         </main>
     </div>

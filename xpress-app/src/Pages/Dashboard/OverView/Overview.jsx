@@ -226,8 +226,8 @@ const Overview = () => {
         {/* Chart Summary */}
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-600 font-medium">Highest Month</p>
-            <p className="text-lg font-bold text-blue-800">
+            <p className="text-sm text-green-600 font-medium">Highest Month</p>
+            <p className="text-lg font-bold text-green-800">
               ${Math.max(...salesData.map(d => d.amount)).toLocaleString()}
             </p>
           </div>
@@ -238,8 +238,8 @@ const Overview = () => {
             </p>
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <p className="text-sm text-purple-600 font-medium">Total Annual</p>
-            <p className="text-lg font-bold text-purple-800">
+            <p className="text-sm text-green-600 font-medium">Total Annual</p>
+            <p className="text-lg font-bold text-green-800">
               ${salesData.reduce((acc, curr) => acc + curr.amount, 0).toLocaleString()}
             </p>
           </div>
