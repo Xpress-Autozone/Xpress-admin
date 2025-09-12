@@ -126,16 +126,17 @@ const Overview = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold text-gray-900">Overview</h1>
+        
         <button
           onClick={refreshData}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium"
+          className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 font-medium"
         >
           Refresh Data
         </button>
       </div>
-
+    <div className='h-1 w-16 bg-amber-300 mb-8'></div>
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard

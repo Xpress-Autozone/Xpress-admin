@@ -10,7 +10,8 @@ import {
   Wrench,
   Armchair,
   Sparkles,
-  LogOut
+  LogOut,
+  User
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -62,6 +63,11 @@ const Sidebar = () => {
       icon: Sparkles,
       label: 'Exterior Accessories',
       path: '/home/exterior-accessories'
+    },
+    {
+      icon: User,
+      label: 'Vendors',
+      path: '/home/vendors'
     }
   ];
 
@@ -81,7 +87,7 @@ const Sidebar = () => {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
           {/* Logo placeholder - replace with your actual logo */}
-          <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
             <Car className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -104,13 +110,13 @@ const Sidebar = () => {
                   onClick={() => handleNavigation(item.path)}
                   className={`w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-left transition-all duration-200 ${
                     isActive
-                      ? 'bg-red-50 text-red-600 border-l-4 border-red-500'
+                      ? 'bg-yellow-50 text-yellow-600 border-l-4 border-yellow-500'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
                   <IconComponent 
                     className={`w-5 h-5 ${
-                      isActive ? 'text-red-500' : 'text-gray-500'
+                      isActive ? 'text-yellow-500' : 'text-gray-500'
                     }`} 
                   />
                   <span className="font-medium">{item.label}</span>

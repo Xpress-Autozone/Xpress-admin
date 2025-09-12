@@ -1,11 +1,8 @@
-import React from 'react';
-import ProductList from '../../../Components/Ui/ProductList/productList';
+import VenderList from "../../Components/Ui/VenderList/venderList";
 
 
-
-const Brakes = () => {
-
-  const itemList = [
+const Vender = () => {
+const itemList = [
     {}
   ]
 
@@ -24,8 +21,8 @@ const Brakes = () => {
 
   return (
     <div className="p-6">
-      <ProductList
-      title='Brakes'
+      <VenderList
+      title='Venders'
       data={itemList}
       onAddItem={handleAddItem}
       onEditItem={handleEditItem}
@@ -33,6 +30,6 @@ const Brakes = () => {
       />
     </div>
   );
-};
+}
 
-export default Brakes;
+export default Vender;

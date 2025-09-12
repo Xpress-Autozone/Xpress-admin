@@ -1,13 +1,33 @@
 import React from 'react';
+import ProductList from '../../../Components/Ui/ProductList/productList';
 
 const TiresWheels = () => {
+  const itemList = [
+    {}
+  ]
+
+  const handleAddItem = () => {
+    // Navigate to add item form
+
+  };
+
+  const handleEditItem = (item) => {
+    // Navigate to edit item form with item details
+  };
+
+  const handleDeleteItem = (item) => {
+    // Handle item deletion
+  }
+
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Tires & Wheels</h1>
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-        <p className="text-gray-600">Manage tires and wheels inventory.</p>
-        {/* Add your tires & wheels content here */}
-      </div>
+      <ProductList
+      title='TiresWheels'
+      data={itemList}
+      onAddItem={handleAddItem}
+      onEditItem={handleEditItem}
+      onDeleteItem={handleDeleteItem}
+      />
     </div>
   );
 };

@@ -11,6 +11,7 @@ import ExhaustSystems from '../Categories/ExhaustSystems/exhaustSystem';
 import InteriorAccessories from '../Categories/InteriorAccessories/interiorAccessories';
 import ExteriorAccessories from '../Categories/ExteriorAccessories/exteriorAccessories';
 import AddProduct from '../Products/product';
+import Vendors from '../Vendors/vendors';
 
 function Home() {
   return (
@@ -34,6 +35,7 @@ function Home() {
                 <Route path="/interior-accessories" element={<InteriorAccessories />} />
                 <Route path="/exterior-accessories" element={<ExteriorAccessories />} />
                 <Route path="/add-products" element={<AddProduct/>} />
+                <Route path="/vendors" element={<Vendors/>} />
             </Routes>
         </main>
     </div>

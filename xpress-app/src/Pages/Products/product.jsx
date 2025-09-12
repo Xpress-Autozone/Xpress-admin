@@ -46,8 +46,7 @@ const AddProduct = () => {
   };
 
   const handleBack = () => {
-    // In a real app, this would navigate to the previous screen
-    alert('Navigate back to previous screen');
+    navigator()
   };
 
   const handleSubmit = () => {
@@ -57,7 +56,8 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className='flex items-center justify-center pt-3'>
+    <div className=" p-6 min-h-screen items-center">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center">
@@ -89,13 +89,13 @@ const AddProduct = () => {
                     value={formData.itemName}
                     onChange={handleInputChange}
                     placeholder="e.g. Spark Plug"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   />
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product ID
+                    Vender ID
                   </label>
                   <input
                     type="text"
@@ -103,7 +103,7 @@ const AddProduct = () => {
                     value={formData.productId}
                     onChange={handleInputChange}
                     placeholder="e.g. 12345XYZ"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   />
                 </div>
                 
@@ -118,7 +118,7 @@ const AddProduct = () => {
                     onChange={handleInputChange}
                     placeholder="e.g. 25.99"
                     step="0.01"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   />
                 </div>
                 
@@ -132,7 +132,7 @@ const AddProduct = () => {
                     value={formData.condition}
                     onChange={handleInputChange}
                     placeholder="e.g. New"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   />
                 </div>
                 
@@ -146,7 +146,7 @@ const AddProduct = () => {
                     value={formData.quantity}
                     onChange={handleInputChange}
                     placeholder="e.g. 100"
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   />
                 </div>
 
@@ -158,7 +158,7 @@ const AddProduct = () => {
                     name="category"
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   >
                     <option value="">Select category</option>
                     <option value="engine">Engine Parts</option>
@@ -185,7 +185,7 @@ const AddProduct = () => {
                 onChange={handleInputChange}
                 placeholder="Describe the car part..."
                 rows={5}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-colors"
+                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none transition-colors"
               />
             </div>
 
@@ -202,7 +202,7 @@ const AddProduct = () => {
                     onChange={handleImageUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-red-400 transition-colors">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-yellow-500 transition-colors">
                     <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-lg font-medium text-gray-600 mb-2">Add Images</p>
                     <p className="text-sm text-gray-500">Click here or drag and drop your images</p>
@@ -221,7 +221,7 @@ const AddProduct = () => {
                         />
                         <button
                           onClick={() => removeImage(image.id)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
+                          className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-yellow-400 transition-colors opacity-0 group-hover:opacity-100"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -245,7 +245,7 @@ const AddProduct = () => {
                     name="priority"
                     value={formData.priority}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                   >
                     <option value="high">High</option>
                     <option value="higher">Higher</option>
@@ -267,7 +267,7 @@ const AddProduct = () => {
                         onChange={handleInputChange}
                         className="sr-only peer"
                       />
-                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-600"></div>
+                      <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-yellow-400"></div>
                     </label>
                     <span className="text-sm font-medium text-gray-700">
                       {formData.displayOnMainPage ? 'Enabled' : 'Disabled'}
@@ -287,7 +287,7 @@ const AddProduct = () => {
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                className="px-8 py-3 bg-yellow-400 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
               >
                 Add Product
               </button>
@@ -295,6 +295,7 @@ const AddProduct = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
