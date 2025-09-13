@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "../Pages/Home/home";
 import LoginPage from "../Pages/Auth/Login/login";
+import AddVendor from "../Pages/Vendors/addVendors";
 // import Dashboard from "../Pages/Dashboard/dashboard";
 // import Overview from "../Pages/Dashboard/Overview/overview";
 // import EngineParts from "../Pages/Categories/EngineParts/engineParts";
@@ -19,6 +20,7 @@ const MainLayout = () => {
                 <Route path="/" element={<Home/>} />
                 <Route path="/login" element={<LoginPage/>} />
                 <Route path="/home/*" element={<Home/>} />
+                <Route path= "/add-vendors" element={<AddVendor/>}/>
             </Routes>
         </BrowserRouter>
     );

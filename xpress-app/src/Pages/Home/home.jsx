@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import SideBar from '../../Components/SideBar/siderBar';
 import Overview from '../Dashboard/OverView/Overview';
 import EngineParts from '../Categories/EngineParts/engineParts';
@@ -12,6 +12,7 @@ import InteriorAccessories from '../Categories/InteriorAccessories/interiorAcces
 import ExteriorAccessories from '../Categories/ExteriorAccessories/exteriorAccessories';
 import AddProduct from '../Products/product';
 import Vendors from '../Vendors/vendors';
+import AddVendors from '../Vendors/addVendors';
 
 function Home() {
   return (
@@ -36,6 +37,7 @@ function Home() {
                 <Route path="/exterior-accessories" element={<ExteriorAccessories />} />
                 <Route path="/add-products" element={<AddProduct/>} />
                 <Route path="/vendors" element={<Vendors/>} />
+                <Route path="/add-vendors" element={<AddVendors/>} />
             </Routes>
         </main>
     </div>

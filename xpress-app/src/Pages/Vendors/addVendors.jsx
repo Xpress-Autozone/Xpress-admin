@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Upload, X, MapPin, Phone, Mail, User } from 'lucide-react';
-
-const AddVendor = () => {
+function AddVendor(){
   const [formData, setFormData] = useState({
     name: '',
     email: '',

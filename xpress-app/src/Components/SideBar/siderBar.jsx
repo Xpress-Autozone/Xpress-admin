@@ -91,7 +91,7 @@ const Sidebar = () => {
             <Car className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">Auto Parts</h1>
+            <h1 className="text-xl font-bold text-gray-900">XpressAuto Parts</h1>
             <p className="text-sm text-gray-500">Admin</p>
           </div>
         </div>

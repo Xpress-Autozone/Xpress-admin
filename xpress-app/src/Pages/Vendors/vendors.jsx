@@ -1,7 +1,9 @@
 import VenderList from "../../Components/Ui/VenderList/venderList";
+import { useNavigate} from 'react-router-dom';
 
-
-const Vender = () => {
+const Vendor = () => {
+  const navigate = useNavigate();
+  
 const itemList = [
     {}
   ]
@@ -24,7 +26,7 @@ const itemList = [
       <VenderList
       title='Venders'
       data={itemList}
-      onAddItem={handleAddItem}
+      onAddItem={() => navigate("/home/add-vendors")}
       onEditItem={handleEditItem}
       onDeleteItem={handleDeleteItem}
       />
@@ -32,4 +34,4 @@ const itemList = [
   );
 }
 
-export default Vender;
+export default Vendor;
