@@ -76,7 +76,7 @@ const VenderList = ({
           className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors font-medium flex items-center space-x-2"
         >
           <Plus className="w-4 h-4" />
-          <span>Add Item</span>
+          <span>Add Vender</span>
         </button>
         
       </div>
@@ -97,7 +97,7 @@ const VenderList = ({
                 Email
               </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                Phone Number
+                Phone
               </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
                 Location
@@ -120,7 +120,7 @@ const VenderList = ({
                   <div className="text-sm font-medium text-gray-900">{item.name || "--"}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">${item.email || '--'}</div>
+                  <div className="text-sm text-gray-900">{item.email || '--'}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{item.phone || 0}</div>

@@ -88,6 +88,9 @@ const ProductList = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                id
+              </th>
+              <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
                 Item Name
               </th>
               <th className="px-6 py-4 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
@@ -110,6 +113,9 @@ const ProductList = ({
           <tbody className="divide-y divide-gray-200">
             {currentItems.map((item, index) => (
               <tr key={item.id || index} className="hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">{item.id || "--"}</div>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">{item.itemName || "--"}</div>
                 </td>
