@@ -56,8 +56,8 @@ const AddProduct = () => {
   };
 
   return (
-    <div className='flex items-center justify-center pt-3'>
-    <div className=" p-6 min-h-screen items-center">
+    <div className='flex  pt-3'>
+    <div className=" p-6 h-screen w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center">
@@ -72,7 +72,7 @@ const AddProduct = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl">
+      <div className="w-full">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="space-y-8">
             {/* Basic Information Section */}
@@ -287,7 +287,7 @@ const AddProduct = () => {
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-8 py-3 bg-yellow-400 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg transition-colors font-medium"
               >
                 Add Product
               </button>

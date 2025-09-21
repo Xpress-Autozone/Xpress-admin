@@ -201,7 +201,7 @@ const ProductList = ({
               </button>
             );
           })}
-          
+
           <button
             onClick={goToNext}
             disabled={currentPage === totalPages}

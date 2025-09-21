@@ -55,8 +55,8 @@ function AddVendor(){
   };
 
   return (
-    <div className='flex flex-1 items-center justify-center p-6 w-full'>
-    <div className="p-3 min-h-screen ">
+    <div className='flex flex-1  p-6 w-full h-screen '>
+    <div className="p-3 h-screen w-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center">
@@ -71,7 +71,7 @@ function AddVendor(){
       </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl">
+      <div className="w-full">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="space-y-8 space-x-18">
             {/* Profile Image Section */}
@@ -87,7 +87,7 @@ function AddVendor(){
                     />
                     <button
                       onClick={removeImage}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                      className="absolute -top-2 -right-2 bg-yellow-400 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -106,7 +106,7 @@ function AddVendor(){
                       onChange={handleImageUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-red-400 transition-colors">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:bg-yellow-400 transition-colors">
                       <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
                       <p className="text-sm font-medium text-gray-600">Upload Profile Image</p>
                       <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
@@ -286,7 +286,7 @@ function AddVendor(){
                     onChange={handleInputChange}
                     className="sr-only peer"
                   />
-                  <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-red-600"></div>
+                  <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:bg-yellow-400 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-yellow-400"></div>
                 </label>
                 <div>
                   <span className="text-sm font-medium text-gray-700">
@@ -312,7 +312,7 @@ function AddVendor(){
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg transition-colors font-medium"
               >
                 Add Vendor
               </button>

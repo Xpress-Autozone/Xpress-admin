@@ -1,8 +1,10 @@
 // InteriorAccessories.jsx
 import React from 'react';
 import ProductList from '../../../Components/Ui/ProductList/productList';
+import { useNavigate} from 'react-router-dom';
 
 const InteriorAccessories = () => {
+  const navigate = useNavigate();
   const itemList = [
     {}
   ]
@@ -25,7 +27,7 @@ const InteriorAccessories = () => {
       <ProductList
       title='InteriorAccessories'
       data={itemList}
-      onAddItem={handleAddItem}
+      onAddItem={()=>navigate("/home/add-products")}
       onEditItem={handleEditItem}
       onDeleteItem={handleDeleteItem}
       />

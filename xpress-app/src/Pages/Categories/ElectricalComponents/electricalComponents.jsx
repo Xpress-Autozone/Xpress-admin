@@ -1,7 +1,9 @@
 import React from 'react';
 import ProductList from '../../../Components/Ui/ProductList/productList';
+import { useNavigate} from 'react-router-dom';
 
 const ElectricalComponents = () => {
+    const navigate = useNavigate();
 
   const itemList = [
     {}
@@ -25,7 +27,7 @@ const ElectricalComponents = () => {
       <ProductList
       title='ElectricalComponents'
       data={itemList}
-      onAddItem={handleAddItem}
+      onAddItem={() => navigate("/home/add-products")}
       onEditItem={handleEditItem}
       onDeleteItem={handleDeleteItem}
       />

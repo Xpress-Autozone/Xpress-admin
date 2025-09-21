@@ -13,6 +13,7 @@ import {
   LogOut,
   User
 } from 'lucide-react';
+import XpressLogo from "../../assets/Xpress-Autozone-Logo.png"
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -84,21 +85,14 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-white h-screen shadow-lg border-r border-gray-200 flex flex-col">
       {/* Header Section with Logo Space */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
-          {/* Logo placeholder - replace with your actual logo */}
-          <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center">
-            <Car className="w-5 h-5 text-white" />
+      <div className=" border-b border-gray-200">
+        <div>
+           <img src={XpressLogo} alt="XpressLogo" className="h-16 w-80 mt-10 mb-10 p-2"/>
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">XpressAuto Parts</h1>
-            <p className="text-sm text-gray-500">Admin</p>
-          </div>
-        </div>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 py-6">
+      <nav className="flex-1 py-3">
         <ul className="space-y-1 px-4">
           {menuItems.map((item, index) => {
             const IconComponent = item.icon;
@@ -128,7 +122,7 @@ const Sidebar = () => {
       </nav>
 
       {/* Logout Section */}
-      <div className="p-4 border-t border-gray-200">
+      <div className="p-4 border-t border-gray-200 ">
         <button 
           onClick={handleLogout}
           className="w-full flex items-center space-x-3 px-3 py-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"

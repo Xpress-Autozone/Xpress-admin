@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import XpressLogo from "../../../assets/Xpress-Autozone-Logo.png"
+import { useNavigate} from 'react-router-dom';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,6 +11,7 @@ const LoginPage = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,31 +28,34 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
 
-    try {
-      // Replace with your actual API endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+    navigate("/")
 
-      const data = await response.json();
+    // try {
+    //   // Replace with your actual API endpoint
+    //   const response = await fetch('/api/auth/login', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(formData),
+    //   });
 
-      if (response.ok) {
-        // Store token in localStorage or secure storage
-        localStorage.setItem('authToken', data.token);
-        // Redirect to dashboard
-        window.location.href = '/dashboard';
-      } else {
-        setError(data.message || 'Login failed. Please try again.');
-      }
-    } catch (err) {
-      setError('Network error. Please check your connection.');
-    } finally {
-      setLoading(false);
-    }
+    //   const data = await response.json();
+
+    //   if (response.ok) {
+    //     // Store token in localStorage or secure storage
+    //     localStorage.setItem('authToken', data.token);
+    //     // Redirect to dashboard
+    //     window.location.href = '/dashboard';
+    //   } else {
+    //     setError(data.message || 'Login failed. Please try again.');
+    //   }
+    // } catch (err) {
+    //   setError('Network error. Please check your connection.');
+    // } finally {
+    //   setLoading(false);
+    // }
+    setLoading(false);
   };
 
   const handleGoogleLogin = () => {
@@ -59,24 +65,21 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden h-full">
         <div className="flex flex-col lg:flex-row">
           {/* Left Side - Login Form */}
           <div className="lg:w-1/2 p-8 lg:p-12">
             <div className="max-w-md mx-auto">
               {/* Header */}
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Xpress Autozone
-                </h1>
-                <p className="text-red-600 font-medium text-lg mb-4">Admin Panel</p>
+              <div className="justify-center items-center">
+                <img src={XpressLogo} alt="XpressLogo" className="h-20 w-80 mb-10"/>
                 <p className="text-gray-600">Welcome back! Please sign in to continue.</p>
               </div>
 
               {/* Error Message */}
               {error && (
                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-600 text-sm">{error}</p>
+                  <p className="text-yellow-600 text-sm">{error}</p>
                 </div>
               )}
 
@@ -144,14 +147,14 @@ const LoginPage = () => {
                       id="remember-me"
                       name="remember-me"
                       type="checkbox"
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                      className="h-4 w-4 text-yellow-600 focus:ring-yeelow-500 border-gray-300 rounded"
                     />
                     <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                       Remember me
                     </label>
                   </div>
                   <div className="text-sm">
-                    <a href="#" className="font-medium text-red-600 hover:text-red-500">
+                    <a href="#" className="font-medium text-yellow-400 hover:text-yellow-500">
                       Forgot password?
                     </a>
                   </div>
@@ -161,7 +164,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-yellow-400 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {loading ? (
                     <div className="flex items-center">
@@ -187,7 +190,7 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={handleGoogleLogin}
-                  className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                  className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                     <path
@@ -214,25 +217,25 @@ const LoginPage = () => {
               {/* Footer */}
               <div className="mt-8 text-center">
                 <p className="text-xs text-gray-500">
-                  ©2023 Xpress Autozone. All Rights Reserved.
+                  ©2025 Xpress Autozone. All Rights Reserved.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Right Side - Hero Section */}
-          <div className="lg:w-1/2 bg-red-600 p-8 lg:p-12 flex items-center justify-center">
+          <div className="lg:w-1/2 bg-amber-300 p-8 lg:p-12 flex items-center justify-center">
             <div className="text-center text-white">
               {/* Lock Icon */}
-              <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-8">
-                <Lock className="w-12 h-12 text-red-600" />
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                <Lock className="w-12 h-12 text-black" />
               </div>
 
               {/* Hero Content */}
-              <h2 className="text-3xl font-bold mb-4">
+              <h2 className="text-3xl font-bold mb-4 text-black">
                 Streamline Your Auto Parts Management
               </h2>
-              <p className="text-red-100 text-lg leading-relaxed">
+              <p className="text-gray-600 text-lg leading-relaxed">
                 Efficiently manage inventory, track sales, and oversee operations with our powerful admin dashboard.
               </p>
             </div>
