@@ -4,7 +4,7 @@ import { ArrowLeft, Upload, X } from 'lucide-react';
 const AddProduct = () => {
   const [formData, setFormData] = useState({
     itemName: '',
-    productId: '',
+    vendorId: '',
     price: '',
     condition: '',
     quantity: '',
@@ -56,7 +56,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className='flex  pt-3'>
+    <div className='flex  mt-20'>
     <div className=" p-6 h-screen w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
@@ -95,12 +95,12 @@ const AddProduct = () => {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Vender ID
+                    Vendor ID
                   </label>
                   <input
                     type="text"
                     name="productId"
-                    value={formData.productId}
+                    value={formData.vendorId}
                     onChange={handleInputChange}
                     placeholder="e.g. 12345XYZ"
                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"

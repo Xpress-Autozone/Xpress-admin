@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import XpressLogo from "../../../assets/Xpress-Autozone-Logo.png"
 import { useNavigate} from 'react-router-dom';
+import { useAuth } from '../../../Contexts/authContext';
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -12,6 +13,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login, signInWithGoogle } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,45 +25,33 @@ const LoginPage = () => {
     if (error) setError('');
   };
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    navigate("/")
-
-    // try {
-    //   // Replace with your actual API endpoint
-    //   const response = await fetch('/api/auth/login', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(formData),
-    //   });
-
-    //   const data = await response.json();
-
-    //   if (response.ok) {
-    //     // Store token in localStorage or secure storage
-    //     localStorage.setItem('authToken', data.token);
-    //     // Redirect to dashboard
-    //     window.location.href = '/dashboard';
-    //   } else {
-    //     setError(data.message || 'Login failed. Please try again.');
-    //   }
-    // } catch (err) {
-    //   setError('Network error. Please check your connection.');
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      setError('');
+      setLoading(true);
+      await login( formData.email, formData.password);
+      // Handle successful login (redirect, etc.)
+      console.log('Login successful!');
+      navigate("/");
+    } catch (error) {
+      setError('Failed to log in: ' + error.message);
+    }
     setLoading(false);
-  };
+  }
 
-  const handleGoogleLogin = () => {
-    // Replace with your Google OAuth implementation
-    window.location.href = '/api/auth/google';
-  };
+  async function handleGoogleSignIn() {
+    try {
+      setError('');
+      setLoading(true);
+      await signInWithGoogle();
+      navigate("/");
+      console.log('Google login successful!');
+    } catch (error) {
+      setError('Failed to log in with Google: ' + error.message);
+    }
+    setLoading(false);
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -189,7 +179,7 @@ const LoginPage = () => {
                 {/* Google Login Button */}
                 <button
                   type="button"
-                  onClick={handleGoogleLogin}
+                  onClick={handleGoogleSignIn}
                   className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
                 >
                   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">

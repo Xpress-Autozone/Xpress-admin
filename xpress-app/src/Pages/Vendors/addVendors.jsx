@@ -55,7 +55,7 @@ function AddVendor(){
   };
 
   return (
-    <div className='flex flex-1  p-6 w-full h-screen '>
+    <div className='flex flex-1  mt-20 w-full h-screen '>
     <div className="p-3 h-screen w-screen">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">

@@ -124,7 +124,7 @@ const Overview = () => {
   );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50 min-h-full mt-20 thin-scrollbar">
       {/* Header */}
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold text-gray-900">Overview</h1>
@@ -179,7 +179,7 @@ const Overview = () => {
         {chartLoading ? (
           <div className="h-80 flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600 mx-auto mb-4"></div>
               <p className="text-gray-500">Loading sales data...</p>
             </div>
           </div>

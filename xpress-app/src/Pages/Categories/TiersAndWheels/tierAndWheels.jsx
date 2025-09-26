@@ -26,7 +26,7 @@ const TiresWheels = () => {
       <ProductList
       title='TiresWheels'
       data={itemList}
-      onAddItem={()=>navigate("/home/add-products")}
+      onAddItem={()=>navigate("/add-products")}
       onEditItem={handleEditItem}
       onDeleteItem={handleDeleteItem}
       />

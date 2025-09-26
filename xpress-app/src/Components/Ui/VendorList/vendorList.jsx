@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Plus, Edit, Trash2, Search, Filter, X, ChevronDown, SortAsc, SortDesc, Download, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Filter, X, ChevronDown, SortAsc, SortDesc, Download, Eye, MapPin, Phone, Mail, Calendar, Building, User } from 'lucide-react';
 
-const ProductList = ({ 
-  title = "Product Management", 
+const VendorList = ({ 
+  title = "Vendor Management", 
   data = [], 
   onAddItem,
   onEditItem,
@@ -14,12 +14,10 @@ const ProductList = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [filters, setFilters] = useState({
-    priceRange: { min: ''},
-    vendor: '',
+    location: '',
     dateRange: { start: '', end: '' },
-    quantityRange: { min: '', max: '' },
-    category: '',
-    status: ''
+    priority: '',
+    isActive: ''
   });
   const [showFilters, setShowFilters] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -27,63 +25,82 @@ const ProductList = ({
   // Default data for demonstration
   const defaultData = [
     {
-      id: '001',
-      itemName: 'Premium Brake Pads',
-      price: 89.99,
-      quantity: 25,
-      vendorName: 'AutoParts Pro',
-      datePosted: '2024-01-15',
-      category: 'Brakes',
-      status: 'In Stock'
+      id: 'V001',
+      name: 'John Mitchell',
+      email: 'j.mitchell@autopartsplus.com',
+      phone: '+1 (555) 123-4567',
+      location: 'New York, NY',
+      company: 'AutoParts Plus',
+      website: 'https://autopartsplus.com',
+      notes: 'Reliable supplier for brake systems and engine parts.',
+      priority: 'high',
+      isActive: true,
+      category: 'Brake Systems',
+      datePublished: '2024-01-15'
     },
     {
-      id: '002',
-      itemName: 'Engine Oil Filter',
-      price: 12.50,
-      quantity: 150,
-      vendorName: 'Motor Supply Co',
-      datePosted: '2024-01-20',
-      category: 'Engine',
-      status: 'In Stock'
+      id: 'V002',
+      name: 'Sarah Chen',
+      email: 's.chen@motorsupply.com',
+      phone: '+1 (555) 234-5678',
+      location: 'Los Angeles, CA',
+      company: 'Motor Supply Co',
+      website: 'https://motorsupply.com',
+      notes: 'Excellent customer service and fast delivery times.',
+      priority: 'high',
+      isActive: true,
+      category: 'Engine Parts',
+      datePublished: '2024-01-10'
     },
     {
-      id: '003',
-      itemName: 'LED Headlight Bulbs',
-      price: 45.75,
-      quantity: 8,
-      vendorName: 'Bright Auto Parts',
-      datePosted: '2024-01-18',
+      id: 'V003',
+      name: 'Michael Rodriguez',
+      email: 'm.rodriguez@brightauto.com',
+      phone: '+1 (555) 345-6789',
+      location: 'Houston, TX',
+      company: 'Bright Auto Parts',
+      website: 'https://brightauto.com',
+      notes: 'Specializes in LED lighting solutions.',
+      priority: 'medium',
+      isActive: false,
       category: 'Lighting',
-      status: 'Low Stock'
+      datePublished: '2024-01-08'
     },
     {
-      id: '004',
-      itemName: 'Air Suspension Kit',
-      price: 299.99,
-      quantity: 5,
-      vendorName: 'Performance Plus',
-      datePosted: '2024-01-12',
+      id: 'V004',
+      name: 'Emily Johnson',
+      email: 'e.johnson@performanceplus.com',
+      phone: '+1 (555) 456-7890',
+      location: 'Chicago, IL',
+      company: 'Performance Plus',
+      website: 'https://performanceplus.com',
+      notes: 'High-performance suspension and exhaust systems.',
+      priority: 'high',
+      isActive: true,
       category: 'Suspension',
-      status: 'Low Stock'
+      datePublished: '2024-01-05'
     },
     {
-      id: '005',
-      itemName: 'Tire Pressure Monitor',
-      price: 67.25,
-      quantity: 35,
-      vendorName: 'Tech Auto Solutions',
-      datePosted: '2024-01-22',
+      id: 'V005',
+      name: 'David Park',
+      email: 'd.park@techautosolutions.com',
+      phone: '+1 (555) 567-8901',
+      location: 'Seattle, WA',
+      company: 'Tech Auto Solutions',
+      website: 'https://techautosolutions.com',
+      notes: 'New vendor pending approval.',
+      priority: 'low',
+      isActive: false,
       category: 'Electronics',
-      status: 'In Stock'
+      datePublished: '2024-01-12'
     }
   ];
 
   const tableData = data.length > 0 ? data : defaultData;
 
-  // Get unique values for filter dropdowns - FIXED: Filter out undefined values
-  const uniqueVendors = [...new Set(tableData.map(item => item.vendorName).filter(Boolean))];
-  const uniqueCategories = [...new Set(tableData.map(item => item.category).filter(Boolean))];
-  const uniqueStatuses = [...new Set(tableData.map(item => item.status).filter(Boolean))];
+  // Get unique values for filter dropdowns
+  const uniqueLocations = [...new Set(tableData.map(item => item.location).filter(Boolean))];
+  const uniquePriorities = [...new Set(tableData.map(item => item.priority).filter(Boolean))];
 
   // Advanced filtering and searching
   const filteredData = useMemo(() => {
@@ -94,27 +111,22 @@ const ProductList = ({
           value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-      // Price range filter
-      const priceMatch = (!filters.priceRange.min || item.price >= parseFloat(filters.priceRange.min))
+      // Location filter
+      const locationMatch = !filters.location || item.location === filters.location;
 
-      // Vendor filter
-      const vendorMatch = !filters.vendor || item.vendorName === filters.vendor;
+      // Priority filter
+      const priorityMatch = !filters.priority || item.priority === filters.priority;
 
-      // Category filter
-      const categoryMatch = !filters.category || item.category === filters.category;
-
-      // Status filter
-      const statusMatch = !filters.status || item.status === filters.status;
+      // Status filter - FIXED: Convert string to boolean comparison
+      const statusMatch = !filters.isActive || 
+        (filters.isActive === 'active' && item.isActive === true) ||
+        (filters.isActive === 'inactive' && item.isActive === false);
 
       // Date range filter
-      const dateMatch = (!filters.dateRange.start || new Date(item.datePosted) >= new Date(filters.dateRange.start)) &&
-                       (!filters.dateRange.end || new Date(item.datePosted) <= new Date(filters.dateRange.end));
+      const dateMatch = (!filters.dateRange.start || new Date(item.datePublished) >= new Date(filters.dateRange.start)) &&
+                       (!filters.dateRange.end || new Date(item.datePublished) <= new Date(filters.dateRange.end));
 
-      // Quantity range filter
-      const quantityMatch = (!filters.quantityRange.min || item.quantity >= parseInt(filters.quantityRange.min)) &&
-                           (!filters.quantityRange.max || item.quantity <= parseInt(filters.quantityRange.max));
-
-      return searchMatch && priceMatch && vendorMatch && categoryMatch && statusMatch && dateMatch && quantityMatch;
+      return searchMatch && locationMatch && priorityMatch && statusMatch && dateMatch;
     });
 
     // Sorting
@@ -163,12 +175,10 @@ const ProductList = ({
 
   const clearFilters = () => {
     setFilters({
-      priceRange: { min: '' },
-      vendor: '',
+      location: '',
       dateRange: { start: '', end: '' },
-      quantityRange: { min: '', max: '' },
-      category: '',
-      status: ''
+      priority: '',
+      isActive: ''
     });
     setSearchTerm('');
     setSortConfig({ key: null, direction: 'asc' });
@@ -192,15 +202,15 @@ const ProductList = ({
 
   const exportData = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "ID,Item Name,Price,Quantity,Vendor,Date Posted,Category,Status\n"
+      + "ID,Name,Email,Phone,Location,Priority,Status,Date Published\n"
       + filteredData.map(row => 
-          `${row.id},${row.itemName},${row.price},${row.quantity},${row.vendorName},${row.datePosted},${row.category},${row.status}`
+          `${row.id},${row.name},${row.email},${row.phone},${row.location},${row.priority},${row.isActive ? 'Active' : 'Inactive'},${row.datePublished}`
         ).join("\n");
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "products.csv");
+    link.setAttribute("download", "vendors.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -222,17 +232,23 @@ const ProductList = ({
     </th>
   );
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'In Stock':
-        return 'bg-green-100 text-green-800';
-      case 'Low Stock':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Out of Stock':
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'high':
         return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'low':
+        return 'bg-green-100 text-green-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getStatusColor = (isActive) => {
+    return isActive 
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-red-100 text-red-800';
   };
 
   return (
@@ -244,7 +260,7 @@ const ProductList = ({
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
               <div className="h-1 w-20 bg-gradient-to-r from-yellow-400 to-amber-400 rounded-full mb-2"></div>
-              <p className="text-gray-600">Manage your inventory with advanced search and filtering</p>
+              <p className="text-gray-600">Manage your vendor relationships and partnerships</p>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -260,7 +276,7 @@ const ProductList = ({
                 className="flex items-center space-x-2 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-5 py-2.5 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
               >
                 <Plus className="w-4 h-4" />
-                <span>Add Item</span>
+                <span>Add Vendor</span>
               </button>
             </div>
           </div>
@@ -272,7 +288,7 @@ const ProductList = ({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Search products, vendors..."
+                placeholder="Search vendors, companies, locations..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none bg-white shadow-sm"
@@ -313,14 +329,13 @@ const ProductList = ({
                   </button>
                 )}
               </div>
-              
+  
               <div className="flex items-center space-x-6 text-sm text-gray-600">
                 <span>Total: <strong className="text-gray-900">{totalItems}</strong></span>
-                <span>In Stock: <strong className="text-green-600">{filteredData.filter(p => p.status === 'In Stock').length}</strong></span>
-                <span>Low Stock: <strong className="text-yellow-600">{filteredData.filter(p => p.status === 'Low Stock').length}</strong></span>
-                <span>Out of Stock: <strong className="text-red-600">{filteredData.filter(p => p.status === 'Out of Stock').length}</strong></span>
+                <span>Active: <strong className="text-green-600">{filteredData.filter(v => v.isActive).length}</strong></span>
+                <span>Inactive: <strong className="text-red-600">{filteredData.filter(v => !v.isActive).length}</strong></span>
                 {selectedItems.length > 0 && (
-                  <span>Selected: <strong className="text-blue-600">{selectedItems.length}</strong></span>
+                  <span>Selected: <strong className="text-yellow-600">{selectedItems.length}</strong></span>
                 )}
               </div>
             </div>
@@ -328,50 +343,35 @@ const ProductList = ({
             {/* Advanced Filters */}
             {showFilters && (
               <div className="bg-white p-6 rounded-xl border border-gray-200 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Price Range */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Location Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price Range</label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.priceRange.min}
-                        onChange={(e) => setFilters(prev => ({
-                          ...prev,
-                          priceRange: { ...prev.priceRange, min: e.target.value }
-                        }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Vendor Filter */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Vendor</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
                     <select
-                      value={filters.vendor}
-                      onChange={(e) => setFilters(prev => ({ ...prev, vendor: e.target.value }))}
+                      value={filters.location}
+                      onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm bg-white"
                     >
-                      <option value="">All Vendors</option>
-                      {uniqueVendors.map(vendor => (
-                        <option key={vendor} value={vendor}>{vendor}</option>
+                      <option value="">All Locations</option>
+                      {uniqueLocations.map(location => (
+                        <option key={location} value={location}>{location}</option>
                       ))}
                     </select>
                   </div>
 
-                  {/* Category Filter */}
+                  {/* Priority Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Priority</label>
                     <select
-                      value={filters.category}
-                      onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
+                      value={filters.priority}
+                      onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm bg-white"
                     >
-                      <option value="">All Categories</option>
-                      {uniqueCategories.map(category => (
-                        <option key={category} value={category}>{category}</option>
+                      <option value="">All Priorities</option>
+                      {uniquePriorities.map(priority => (
+                        <option key={priority} value={priority}>
+                          {priority ? priority.charAt(0).toUpperCase() + priority.slice(1) : 'Unknown'}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -380,70 +380,39 @@ const ProductList = ({
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
                     <select
-                      value={filters.status}
-                      onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                      value={filters.isActive}
+                      onChange={(e) => setFilters(prev => ({ ...prev, isActive: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm bg-white"
                     >
                       <option value="">All Status</option>
-                      {uniqueStatuses.map(status => (
-                        <option key={status} value={status}>{status}</option>
-                      ))}
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Second Row for Quantity and Date Range */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Quantity Range */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Quantity Range</label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.quantityRange.min}
-                        onChange={(e) => setFilters(prev => ({
-                          ...prev,
-                          quantityRange: { ...prev.quantityRange, min: e.target.value }
-                        }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={filters.quantityRange.max}
-                        onChange={(e) => setFilters(prev => ({
-                          ...prev,
-                          quantityRange: { ...prev.quantityRange, max: e.target.value }
-                        }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Date Range */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="date"
-                        value={filters.dateRange.start}
-                        onChange={(e) => setFilters(prev => ({
-                          ...prev,
-                          dateRange: { ...prev.dateRange, start: e.target.value }
-                        }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
-                      />
-                      <input
-                        type="date"
-                        value={filters.dateRange.end}
-                        onChange={(e) => setFilters(prev => ({
-                          ...prev,
-                          dateRange: { ...prev.dateRange, end: e.target.value }
-                        }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
-                      />
-                    </div>
+                {/* Date Range */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Date Range</label>
+                  <div className="flex space-x-2 max-w-md">
+                    <input
+                      type="date"
+                      value={filters.dateRange.start}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        dateRange: { ...prev.dateRange, start: e.target.value }
+                      }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
+                    />
+                    <input
+                      type="date"
+                      value={filters.dateRange.end}
+                      onChange={(e) => setFilters(prev => ({
+                        ...prev,
+                        dateRange: { ...prev.dateRange, end: e.target.value }
+                      }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
+                    />
                   </div>
                 </div>
               </div>
@@ -466,13 +435,13 @@ const ProductList = ({
                 />
               </th>
               <SortableHeader sortKey="id">ID</SortableHeader>
-              <SortableHeader sortKey="itemName">Item Name</SortableHeader>
-              <SortableHeader sortKey="price">Price</SortableHeader>
-              <SortableHeader sortKey="quantity">Quantity</SortableHeader>
-              <SortableHeader sortKey="vendorName">Vendor</SortableHeader>
-              <SortableHeader sortKey="category">Category</SortableHeader>
-              <SortableHeader sortKey="datePosted">Date Posted</SortableHeader>
-              <SortableHeader sortKey="status">Status</SortableHeader>
+              <SortableHeader sortKey="name">Vendor Name</SortableHeader>
+              <SortableHeader sortKey="email">Email</SortableHeader>
+              <SortableHeader sortKey="phone">Phone</SortableHeader>
+              <SortableHeader sortKey="location">Location</SortableHeader>
+              <SortableHeader sortKey="datePublished">Date Joined</SortableHeader>
+              <SortableHeader sortKey="priority">Priority</SortableHeader>
+              <SortableHeader sortKey="isActive">Status</SortableHeader>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 Actions
               </th>
@@ -481,10 +450,10 @@ const ProductList = ({
           <tbody className="divide-y divide-gray-200 bg-white">
             {currentItems.length === 0 ? (
               <tr>
-                <td colSpan="10" className="px-6 py-12 text-center text-gray-500">
+                <td colSpan="9" className="px-6 py-12 text-center text-gray-500">
                   <div className="flex flex-col items-center">
-                    <Search className="w-12 h-12 text-gray-300 mb-4" />
-                    <p className="text-lg font-medium mb-2">No products found</p>
+                    <User className="w-12 h-12 text-gray-300 mb-4" />
+                    <p className="text-lg font-medium mb-2">No vendors found</p>
                     <p className="text-sm">Try adjusting your search or filter criteria</p>
                   </div>
                 </td>
@@ -508,27 +477,29 @@ const ProductList = ({
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">{item.id || "--"}</div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{item.itemName || "--"}</div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-semibold text-gray-900">{item.name || "--"}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-green-600">${item.price?.toFixed(2) || '0.00'}</div>
+                    <div className="text-sm text-gray-900">{item.email || '--'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.quantity || 0}</div>
+                    <div className="text-sm text-gray-900">{item.phone || '--'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.vendorName || 'N/A'}</div>
+                    <div className="text-sm text-gray-900">{item.location || 'N/A'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.category || 'N/A'}</div>
+                    <div className="text-sm text-gray-900">{item.datePublished || 'N/A'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{item.datePosted || 'N/A'}</div>
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getPriorityColor(item.priority)}`}>
+                      {item.priority ? item.priority.charAt(0).toUpperCase() + item.priority.slice(1) : 'Medium'}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                      {item.status || 'Unknown'}
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.isActive)}`}>
+                      {item.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -536,14 +507,14 @@ const ProductList = ({
                       <button
                         onClick={() => onEditItem?.(item)}
                         className="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-2 rounded-lg text-sm font-medium transition-colors"
-                        title="Edit Item"
+                        title="Edit Vendor"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => onDeleteItem?.(item)}
                         className="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg text-sm font-medium transition-colors"
-                        title="Delete Item"
+                        title="Delete Vendor"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -562,7 +533,7 @@ const ProductList = ({
           <div className="text-sm text-gray-600 mb-4 sm:mb-0">
             Showing <span className="font-semibold">{startIndex + 1}</span> to{' '}
             <span className="font-semibold">{Math.min(endIndex, totalItems)}</span> of{' '}
-            <span className="font-semibold">{totalItems}</span> entries
+            <span className="font-semibold">{totalItems}</span> vendors
             {filteredData.length !== tableData.length && (
               <span className="text-yellow-600 ml-2">
                 (filtered from {tableData.length} total)
@@ -629,4 +600,4 @@ const ProductList = ({
   );
 };
 
-export default ProductList;
+export default VendorList;
