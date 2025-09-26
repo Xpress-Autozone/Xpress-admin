@@ -10,8 +10,12 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
+import { useNavigate} from 'react-router-dom';
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext();
+
+const db = getFirestore();
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -31,9 +35,11 @@ export function AuthProvider({ children }) {
   const logout = () => signOut(auth);
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
   
-  const signInWithGoogle = () => {
+  const signInWithGoogle = async() => {
+
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider);
+
   };
 
   useEffect(() => {
