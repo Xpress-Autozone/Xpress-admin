@@ -3,7 +3,6 @@ import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import XpressLogo from "../../../assets/Xpress-Autozone-Logo.png"
 import { useNavigate} from 'react-router-dom';
 import { useAuth } from '../../../Contexts/authContext';
-import {app} from "../../../firebase/config"
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const db = getFirestore();
@@ -34,10 +33,25 @@ const LoginPage = () => {
     try {
       setError('');
       setLoading(true);
-      await login( formData.email, formData.password);
+      const result = await login( formData.email, formData.password);
       // Handle successful login (redirect, etc.)
-      console.log('Login successful!');
+      const user = result.user;
+    
+      if (user) {
+    // Force refresh token to get latest claims
+    const tokenResult = await user.getIdTokenResult(true);
+    const role = tokenResult.claims.role || "user"; // default fallback
+    console.log("Role:", role);
 
+    if (role === "admin") {
+      // Show admin dashboard
+       navigate("/")
+    } else {
+      // Show normal user UI
+      setError("You do not have admin access")
+     }
+   }
+      console.log('Login successful!');
     } catch (error) {
       setError('Failed to log in: ' + error.message);
     }
@@ -51,26 +65,20 @@ const LoginPage = () => {
       const result = await signInWithGoogle();
        const user = result.user;
     
-      // Check if user exists in Firestore
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-    
-      if (!userSnap.exists()) {
-        // First time user → set default role
-        await setDoc(userRef, {
-          email: user.email,
-          role: "user"
-        });
-      }
-    
-      const role = (await getDoc(userRef)).data().role;
-      console.log("User role:", role);
+     if (user) {
+    // Force refresh token to get latest claims
+    const tokenResult = await user.getIdTokenResult(true);
+    const role = tokenResult.claims.role || "user"; 
+    console.log("Role:", role);
 
-      if(role === "admin"){
-        navigate("/")
-      }else{
-
-      }
+    if (role === "admin") {
+      // Show admin dashboard
+       navigate("/")
+    } else {
+      // Show normal user UI
+      setError("You do not have admin access")
+     }
+   }
       console.log('Google login successful!');
     } catch (error) {
       setError('Failed to log in with Google: ' + error.message);
