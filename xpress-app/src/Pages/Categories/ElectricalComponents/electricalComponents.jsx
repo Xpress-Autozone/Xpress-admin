@@ -1,17 +1,14 @@
-import React from 'react';
-import ProductList from '../../../Components/Ui/ProductList/productList';
-import { useNavigate} from 'react-router-dom';
+import React, { useState } from "react";
+import ProductList from "../../../Components/Ui/ProductList/productList";
+import { useNavigate } from "react-router-dom";
 
 const ElectricalComponents = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const itemList = [
-    {}
-  ]
+  const itemList = [{}];
 
   const handleAddItem = () => {
     // Navigate to add item form
-
   };
 
   const handleEditItem = (item) => {
@@ -19,17 +16,18 @@ const ElectricalComponents = () => {
   };
 
   const handleDeleteItem = (item) => {
-    // Handle item deletion
-  }
+    // Handle item deletion logic here (e.g., API call)
+    console.log("Deleting item:", item);
+  };
 
   return (
     <div className="p-6">
       <ProductList
-      title='ElectricalComponents'
-      data={itemList}
-      onAddItem={() => navigate("/add-products")}
-      onEditItem={handleEditItem}
-      onDeleteItem={handleDeleteItem}
+        title="ElectricalComponents"
+        data={itemList}
+        onAddItem={() => navigate("/add-products")}
+        onEditItem={handleEditItem}
+        onDeleteItem={handleDeleteItem}
       />
     </div>
   );
