@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { ArrowLeft, Upload, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import AlertModal from "../../components/AlertModal";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -19,6 +21,8 @@ const AddProduct = () => {
   const { user, token } = useSelector((state) => state.auth);
 
   const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [alert, setAlert] = useState({ isOpen: false, type: "info", title: "", message: "" });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -57,10 +61,21 @@ const AddProduct = () => {
     navigate(-1);
   };
 
+  const showAlert = (type, title, message) => {
+    setAlert({ isOpen: true, type, title, message });
+  };
+
+  const closeAlert = () => {
+    setAlert({ ...alert, isOpen: false });
+  };
+
   const handleSubmit = async () => {
-    console.log("Starting product submission...");
-    console.log("Form Data State:", formData);
-    console.log("Images to upload:", images.length);
+    if (!formData.itemName || !formData.price || !formData.quantity) {
+      showAlert("warning", "Missing Information", "Please fill in all required fields.");
+      return;
+    }
+
+    setIsLoading(true);
 
     const data = new FormData();
     data.append("itemName", formData.itemName);
@@ -73,7 +88,6 @@ const AddProduct = () => {
     data.append("priority", Number(formData.priority));
     data.append("displayOnPage", formData.displayOnPage);
 
-    // Append images
     images.forEach((img, index) => {
       if (index === 0) {
         data.append("mainImage", img.file);
@@ -83,8 +97,6 @@ const AddProduct = () => {
     });
 
     try {
-      console.log("this is the auth token! ::::", token);
-
       const response = await fetch("http://localhost:3001/products", {
         method: "POST",
         headers: {
@@ -94,17 +106,19 @@ const AddProduct = () => {
       });
 
       const result = await response.json();
-      console.log("Server Response:", result);
 
       if (!response.ok) {
         throw new Error(result.message || "Network response was not ok");
       }
 
-      alert("Product added successfully!");
-      navigate(-1);
+      showAlert("success", "Success!", "Product added successfully!");
+      setTimeout(() => {
+        navigate(-1);
+      }, 1500);
     } catch (error) {
-      console.error("Error adding product:", error);
-      alert("Failed to add product: " + error.message);
+      showAlert("error", "Error", "Failed to add product: " + error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -350,15 +364,25 @@ const AddProduct = () => {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 text-white rounded-lg transition-colors font-medium"
+                  disabled={isLoading}
+                  className="px-8 py-3 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
                 >
-                  Add Product
+                  {isLoading && <LoadingSpinner size="sm" color="gray" />}
+                  <span>{isLoading ? "Adding Product..." : "Add Product"}</span>
                 </button>
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={closeAlert}
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
+      />
     </div>
   );
 };
