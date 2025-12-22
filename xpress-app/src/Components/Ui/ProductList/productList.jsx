@@ -13,6 +13,8 @@ import {
   Eye,
 } from "lucide-react";
 import DeleteConfirmationModal from "../DeleteConfirmModal/DeleteConfirmationModal";
+import useDeleteProduct from "../../../hooks/useDeleteProduct";
+import AlertModal from "../../AlertModal";
 
 const ProductList = ({
   title = "Product Management",
@@ -38,6 +40,8 @@ const ProductList = ({
   const [selectedItems, setSelectedItems] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [alert, setAlert] = useState({ isOpen: false, type: "info", title: "", message: "" });
+  const { deleteProduct } = useDeleteProduct();
 
   // Default data for demonstration
   const defaultData = [
@@ -257,10 +261,30 @@ const ProductList = ({
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    onDeleteItem?.(itemToDelete);
-    setIsDeleteModalOpen(false);
-    setItemToDelete(null);
+  const handleConfirmDelete = async () => {
+    try {
+      console.log('[ProductList] Deleting product:', itemToDelete.id);
+      await deleteProduct(itemToDelete.id, false);
+      
+      setAlert({
+        isOpen: true,
+        type: "success",
+        title: "Success",
+        message: "Product deleted successfully"
+      });
+      
+      onDeleteItem?.(itemToDelete);
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+    } catch (error) {
+      console.error('[ProductList] Error deleting product:', error);
+      setAlert({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message: error.message
+      });
+    }
   };
 
   const SortableHeader = ({ children, sortKey, className = "" }) => (
@@ -815,6 +839,13 @@ const ProductList = ({
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
         itemName={itemToDelete?.itemName}
+      />
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert({ ...alert, isOpen: false })}
+        type={alert.type}
+        title={alert.title}
+        message={alert.message}
       />
     </div>
   );

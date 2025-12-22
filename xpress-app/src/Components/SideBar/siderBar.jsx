@@ -11,7 +11,8 @@ import {
   Armchair,
   Sparkles,
   LogOut,
-  User
+  User,
+  Shield
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -68,6 +69,11 @@ const Sidebar = () => {
       icon: User,
       label: 'Vendors',
       path: '/vendors'
+    },
+    {
+      icon: Shield,
+      label: 'Admin Roles',
+      path: '/admin-roles'
     }
   ];
 

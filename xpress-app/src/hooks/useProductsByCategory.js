@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-const useProductsByCategory = (category) => {
+const useProductsByCategory = (category, refreshKey = 0) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,10 +16,14 @@ const useProductsByCategory = (category) => {
       }
 
       try {
-        console.log(`[useProductsByCategory] Fetching products for category: ${category}`);
+        console.log(
+          `[useProductsByCategory] Fetching products for category: ${category}`
+        );
         console.log(`[useProductsByCategory] Auth token available: ${!!token}`);
 
-        const url = `http://localhost:3001/products/category/${encodeURIComponent(category)}`;
+        const url = `http://localhost:3001/products/category/${encodeURIComponent(
+          category
+        )}`;
         console.log(`[useProductsByCategory] Request URL: ${url}`);
 
         const response = await fetch(url, {
@@ -30,7 +34,9 @@ const useProductsByCategory = (category) => {
           },
         });
 
-        console.log(`[useProductsByCategory] Response status: ${response.status}`);
+        console.log(
+          `[useProductsByCategory] Response status: ${response.status}`
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -39,7 +45,11 @@ const useProductsByCategory = (category) => {
         }
 
         const data = await response.json();
-        console.log(`[useProductsByCategory] Successfully fetched ${data.data?.length || 0} products`);
+        console.log(
+          `[useProductsByCategory] Successfully fetched ${
+            data.data?.length || 0
+          } products`
+        );
         console.log(`[useProductsByCategory] Response data:`, data);
 
         setProducts(data.data || []);
@@ -54,7 +64,7 @@ const useProductsByCategory = (category) => {
     };
 
     fetchProducts();
-  }, [category, token]);
+  }, [category, token, refreshKey]);
 
   return { products, loading, error };
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ProductList from '../../../Components/Ui/ProductList/productList';
 import { useNavigate } from 'react-router-dom';
 import useProductsByCategory from '../../../hooks/useProductsByCategory';
@@ -7,7 +7,8 @@ import EmptyState from '../../../Components/EmptyState';
 
 const ExteriorAccessories = () => {
   const navigate = useNavigate();
-  const { products, loading, error } = useProductsByCategory('exterior');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { products, loading, error } = useProductsByCategory('exterior', refreshKey);
 
   if (loading) {
     return (
@@ -35,6 +36,11 @@ const ExteriorAccessories = () => {
     );
   }
 
+  const handleDeleteItem = (item) => {
+    console.log('[ExteriorAccessories] Item deleted, refreshing list');
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <div className="p-6">
       <ProductList
@@ -42,7 +48,7 @@ const ExteriorAccessories = () => {
         data={products}
         onAddItem={() => navigate("/add-products")}
         onEditItem={(item) => console.log('[ExteriorAccessories] Edit item:', item)}
-        onDeleteItem={(item) => console.log('[ExteriorAccessories] Delete item:', item)}
+        onDeleteItem={handleDeleteItem}
       />
     </div>
   );

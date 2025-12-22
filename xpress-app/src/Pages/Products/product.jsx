@@ -22,7 +22,12 @@ const AddProduct = () => {
 
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [alert, setAlert] = useState({ isOpen: false, type: "info", title: "", message: "" });
+  const [alert, setAlert] = useState({
+    isOpen: false,
+    type: "info",
+    title: "",
+    message: "",
+  });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,7 +76,11 @@ const AddProduct = () => {
 
   const handleSubmit = async () => {
     if (!formData.itemName || !formData.price || !formData.quantity) {
-      showAlert("warning", "Missing Information", "Please fill in all required fields.");
+      showAlert(
+        "warning",
+        "Missing Information",
+        "Please fill in all required fields."
+      );
       return;
     }
 
@@ -375,7 +384,7 @@ const AddProduct = () => {
           </div>
         </div>
       </div>
-      
+
       <AlertModal
         isOpen={alert.isOpen}
         onClose={closeAlert}

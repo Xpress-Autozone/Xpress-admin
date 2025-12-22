@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import ProductList from "../../../Components/Ui/ProductList/productList";
 import { useNavigate } from "react-router-dom";
 import useProductsByCategory from "../../../hooks/useProductsByCategory";
@@ -7,7 +7,8 @@ import EmptyState from "../../../Components/EmptyState";
 
 const SuspensionAndSteering = () => {
   const navigate = useNavigate();
-  const { products, loading, error } = useProductsByCategory("suspension");
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { products, loading, error } = useProductsByCategory("suspension", refreshKey);
 
   if (loading) {
     return (
@@ -35,6 +36,11 @@ const SuspensionAndSteering = () => {
     );
   }
 
+  const handleDeleteItem = (item) => {
+    console.log('[SuspensionAndSteering] Item deleted, refreshing list');
+    setRefreshKey(prev => prev + 1);
+  };
+
   return (
     <div className="p-6">
       <ProductList
@@ -44,9 +50,7 @@ const SuspensionAndSteering = () => {
         onEditItem={(item) =>
           console.log("[SuspensionAndSteering] Edit item:", item)
         }
-        onDeleteItem={(item) =>
-          console.log("[SuspensionAndSteering] Delete item:", item)
-        }
+        onDeleteItem={handleDeleteItem}
       />
     </div>
   );
