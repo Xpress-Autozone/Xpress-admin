@@ -85,20 +85,23 @@ function AddVendor() {
     try {
       console.log("[AddVendor] Creating vendor with email:", formData.email);
 
-      const response = await fetch("http://localhost:3001/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          displayName: formData.displayName,
-          phoneNumber: formData.phoneNumber,
-          role: "vendor",
-        }),
-      });
+      const response = await fetch(
+        "https://xpress-backend-eeea.onrender.com/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            displayName: formData.displayName,
+            phoneNumber: formData.phoneNumber,
+            role: "vendor",
+          }),
+        }
+      );
 
       console.log(`[AddVendor] Response status: ${response.status}`);
 

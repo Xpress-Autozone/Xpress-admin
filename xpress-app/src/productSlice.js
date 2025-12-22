@@ -5,7 +5,9 @@ export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch("http://localhost:3001/products");
+      const response = await fetch(
+        "https://xpress-backend-eeea.onrender.com/products"
+      );
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.message || "Failed to fetch products");
@@ -21,14 +23,17 @@ export const addProduct = createAsyncThunk(
   async (productData, { rejectWithValue, getState }) => {
     try {
       const { token } = getState().auth;
-      const response = await fetch("http://localhost:3001/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(productData),
-      });
+      const response = await fetch(
+        "https://xpress-backend-eeea.onrender.com/products",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(productData),
+        }
+      );
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.message || "Failed to add product");
@@ -44,12 +49,15 @@ export const deleteProduct = createAsyncThunk(
   async (id, { rejectWithValue, getState }) => {
     try {
       const { token } = getState().auth;
-      const response = await fetch(`http://localhost:3001/products/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `https://xpress-backend-eeea.onrender.com/products/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.message || "Failed to delete product");

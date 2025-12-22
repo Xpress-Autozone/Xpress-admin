@@ -9,7 +9,7 @@ const useDeleteProduct = () => {
         `[useDeleteProduct] Deleting product ${productId}, hardDelete: ${hardDelete}`
       );
 
-      const url = `http://localhost:3001/products/${productId}?hardDelete=${hardDelete}`;
+      const url = `https://xpress-backend-eeea.onrender.com/products/${productId}?hardDelete=${hardDelete}`;
       console.log(`[useDeleteProduct] Request URL: ${url}`);
 
       const response = await fetch(url, {

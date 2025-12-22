@@ -13,7 +13,8 @@ const useVendors = () => {
         console.log("[useVendors] Fetching vendors");
         console.log(`[useVendors] Auth token available: ${!!token}`);
 
-        const url = "http://localhost:3001/users?role=vendor";
+        const url =
+          "https://xpress-backend-eeea.onrender.com/users?role=vendor";
         console.log(`[useVendors] Request URL: ${url}`);
 
         const response = await fetch(url, {

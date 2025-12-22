@@ -21,7 +21,7 @@ const useProductsByCategory = (category, refreshKey = 0) => {
         );
         console.log(`[useProductsByCategory] Auth token available: ${!!token}`);
 
-        const url = `http://localhost:3001/products/category/${encodeURIComponent(
+        const url = `https://xpress-backend-eeea.onrender.com/products/category/${encodeURIComponent(
           category
         )}`;
         console.log(`[useProductsByCategory] Request URL: ${url}`);

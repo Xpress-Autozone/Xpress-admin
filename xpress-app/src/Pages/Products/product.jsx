@@ -106,13 +106,16 @@ const AddProduct = () => {
     });
 
     try {
-      const response = await fetch("http://localhost:3001/products", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: data,
-      });
+      const response = await fetch(
+        "https://xpress-backend-eeea.onrender.com/products",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: data,
+        }
+      );
 
       const result = await response.json();
 

@@ -26,13 +26,16 @@ const AdminRoles = () => {
   const fetchUsers = async () => {
     try {
       console.log("[AdminRoles] Fetching all users");
-      const response = await fetch("http://localhost:3001/users", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-      });
+      const response = await fetch(
+        "https://xpress-backend-eeea.onrender.com/users",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
+      );
 
       console.log(`[AdminRoles] Response status: ${response.status}`);
 
@@ -60,14 +63,17 @@ const AdminRoles = () => {
     try {
       console.log(`[AdminRoles] Assigning role ${role} to user ${userId}`);
 
-      const response = await fetch("http://localhost:3001/users/role", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify({ uid: userId, role }),
-      });
+      const response = await fetch(
+        "https://xpress-backend-eeea.onrender.com/users/role",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({ uid: userId, role }),
+        }
+      );
 
       console.log(
         `[AdminRoles] Role assignment response status: ${response.status}`
