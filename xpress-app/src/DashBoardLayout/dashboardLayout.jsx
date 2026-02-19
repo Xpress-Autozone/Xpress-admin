@@ -17,6 +17,7 @@ import ExteriorAccessories from '../Pages/Categories/ExteriorAccessories/exterio
 import AddProduct from '../Pages/Products/product';
 import Vendors from '../Pages/Vendors/vendors';
 import AddVendors from '../Pages/Vendors/addVendors';
+import AdminRoles from '../Pages/AdminRoles/AdminRoles';
 
 function DashboardLayout() {
   return (
@@ -48,6 +49,7 @@ function DashboardLayout() {
               <Route path="/add-products" element={<AddProduct/>} />
               <Route path="/vendors" element={<Vendors/>} />
               <Route path="/add-vendors" element={<AddVendors/>} />
+              <Route path="/admin-roles" element={<AdminRoles/>} />
             </Routes>
           </main>
         </div>

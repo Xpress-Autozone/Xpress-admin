@@ -4,6 +4,8 @@ import XpressLogo from "../../../assets/Xpress-Autozone-Logo.png"
 import { useNavigate} from 'react-router-dom';
 import { useAuth } from '../../../Contexts/authContext';
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../../../authSlice';
 
 const db = getFirestore();
 
@@ -17,6 +19,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login, signInWithGoogle } = useAuth();
+  const dispatch = useDispatch();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,6 +45,15 @@ const LoginPage = () => {
     const tokenResult = await user.getIdTokenResult(true);
     const role = tokenResult.claims.role || "user"; // default fallback
     console.log("Role:", role);
+
+    dispatch(setCredentials({
+      user: {
+        uid: user.uid,
+        email: user.email,
+        role: role
+      },
+      token: tokenResult.token
+    }));
 
     if (role === "admin") {
       // Show admin dashboard
@@ -70,6 +82,15 @@ const LoginPage = () => {
     const tokenResult = await user.getIdTokenResult(true);
     const role = tokenResult.claims.role || "user"; 
     console.log("Role:", role);
+
+    dispatch(setCredentials({
+      user: {
+        uid: user.uid,
+        email: user.email,
+        role: role
+      },
+      token: tokenResult.token
+    }));
 
     if (role === "admin") {
       // Show admin dashboard
