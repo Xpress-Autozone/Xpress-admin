@@ -5,55 +5,76 @@ const useVendors = () => {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { token } = useSelector((state) => state.auth);
 
-  useEffect(() => {
-    const fetchVendors = async () => {
-      try {
-        console.log("[useVendors] Fetching vendors");
-        console.log(`[useVendors] Auth token available: ${!!token}`);
+  const fetchVendors = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await fetch("https://xpress-backend-eeea.onrender.com/vendors", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const url =
-          "https://xpress-backend-eeea.onrender.com/users?role=vendor";
-        console.log(`[useVendors] Request URL: ${url}`);
-
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
-
-        console.log(`[useVendors] Response status: ${response.status}`);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error(`[useVendors] Error response:`, errorData);
-          throw new Error(errorData.message || `HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log(
-          `[useVendors] Successfully fetched ${data.data?.length || 0} vendors`
-        );
-        console.log(`[useVendors] Response data:`, data);
-
-        setVendors(data.data || []);
-        setError(null);
-      } catch (err) {
-        console.error(`[useVendors] Error fetching vendors:`, err);
-        setError(err.message);
-        setVendors([]);
-      } finally {
-        setLoading(false);
+      // Handle non-JSON responses (e.g. Render cold-start HTML page)
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Backend server is starting up. Please try again in a moment.");
       }
-    };
 
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to fetch vendors");
+      setVendors(data.data || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchVendors();
-  }, [token]);
+  }, [token, refreshKey]);
 
-  return { vendors, loading, error };
+  const deleteVendor = async (id) => {
+    try {
+      const response = await fetch(`https://xpress-backend-eeea.onrender.com/vendors/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to delete vendor");
+      setRefreshKey(prev => prev + 1);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  const updateVendor = async (id, vendorData) => {
+    try {
+      const response = await fetch(`https://xpress-backend-eeea.onrender.com/vendors/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(vendorData),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to update vendor");
+      setRefreshKey(prev => prev + 1);
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  };
+
+  return { vendors, loading, error, deleteVendor, updateVendor, refresh: () => setRefreshKey(prev => prev + 1) };
 };
 
 export default useVendors;

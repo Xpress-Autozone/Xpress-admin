@@ -10,8 +10,10 @@ import {
   signInWithPopup
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../authSlice';
 
 const AuthContext = createContext();
 
@@ -28,14 +30,15 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   // Auth functions
   const signup = (email, password) => createUserWithEmailAndPassword(auth, email, password);
   const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
   const logout = () => signOut(auth);
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
-  
-  const signInWithGoogle = async() => {
+
+  const signInWithGoogle = async () => {
 
     const provider = new GoogleAuthProvider();
     return signInWithPopup(auth, provider);
@@ -43,13 +46,31 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Force refresh token to get latest claims
+          const tokenResult = await user.getIdTokenResult(true);
+          const role = tokenResult.claims.role || "user";
+
+          dispatch(setCredentials({
+            user: {
+              uid: user.uid,
+              email: user.email,
+              role: role
+            },
+            token: tokenResult.token
+          }));
+        } catch (error) {
+          console.error("[AuthContext] Error syncing with Redux:", error);
+        }
+      }
       setCurrentUser(user);
       setLoading(false);
     });
 
     return unsubscribe;
-  }, []);
+  }, [dispatch]);
 
   const value = {
     currentUser,

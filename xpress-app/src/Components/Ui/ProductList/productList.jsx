@@ -15,7 +15,7 @@ import {
 import DeleteConfirmationModal from "../DeleteConfirmModal/DeleteConfirmationModal";
 import useDeleteProduct from "../../../hooks/useDeleteProduct";
 import AlertModal from "../../AlertModal";
-
+import { CATEGORIES } from "../../../constants/categories";
 const ProductList = ({
   title = "Product Management",
   data = [],
@@ -24,6 +24,7 @@ const ProductList = ({
   onDeleteItem,
   onViewItem,
   itemsPerPage = 10,
+  initialFilters = {},
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,9 +34,18 @@ const ProductList = ({
     vendor: "",
     dateRange: { start: "", end: "" },
     quantityRange: { min: "", max: "" },
-    category: "",
-    status: "",
+    category: initialFilters.category || "",
+    status: initialFilters.status || "",
   });
+
+  // Update filters if initialFilters change (e.g. navigation)
+  React.useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      category: initialFilters.category || "",
+      status: initialFilters.status || prev.status
+    }));
+  }, [initialFilters.category, initialFilters.status]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -104,11 +114,13 @@ const ProductList = ({
     ...new Set(tableData.map((item) => item.vendorName).filter(Boolean)),
   ];
   const uniqueCategories = [
-    ...new Set(tableData.map((item) => item.category).filter(Boolean)),
+    ...new Set(tableData.map((item) => item.categoryId || item.category).filter(Boolean)),
   ];
-  const uniqueStatuses = [
-    ...new Set(tableData.map((item) => item.status).filter(Boolean)),
-  ];
+
+  // Helper to get category label
+  const getCategoryLabel = (id) => {
+    return CATEGORIES.find(c => c.id === id)?.label || id;
+  };
 
   // Advanced filtering and searching
   const filteredData = useMemo(() => {
@@ -130,10 +142,12 @@ const ProductList = ({
 
       // Category filter
       const categoryMatch =
-        !filters.category || item.category === filters.category;
+        !filters.category || (item.categoryId || item.category) === filters.category;
 
       // Status filter
-      const statusMatch = !filters.status || item.status === filters.status;
+      const itemStock = item.stock || item.quantity || 0;
+      const derivedStatus = item.status || (itemStock > 10 ? "In Stock" : itemStock > 0 ? "Low Stock" : "Out of Stock");
+      const statusMatch = !filters.status || derivedStatus === filters.status;
 
       // Date range filter
       const dateMatch =
@@ -265,14 +279,14 @@ const ProductList = ({
     try {
       console.log('[ProductList] Deleting product:', itemToDelete.id);
       await deleteProduct(itemToDelete.id, false);
-      
+
       setAlert({
         isOpen: true,
         type: "success",
         title: "Success",
         message: "Product deleted successfully"
       });
-      
+
       onDeleteItem?.(itemToDelete);
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
@@ -333,6 +347,7 @@ const ProductList = ({
 
             <div className="flex items-center space-x-3">
               <button
+                type="button"
                 onClick={exportData}
                 className="flex items-center space-x-2 bg-white hover:bg-gray-300 text-black px-4 py-2 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md"
               >
@@ -340,6 +355,7 @@ const ProductList = ({
                 <span>Export</span>
               </button>
               <button
+                type="button"
                 onClick={() => onAddItem?.()}
                 className="flex items-center space-x-2 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-600 hover:to-amber-600 text-white px-5 py-2.5 rounded-xl transition-all duration-200 font-medium shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
               >
@@ -376,18 +392,16 @@ const ProductList = ({
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${
-                    showFilters
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  } border border-gray-300`}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${showFilters
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    } border border-gray-300`}
                 >
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      showFilters ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -395,14 +409,14 @@ const ProductList = ({
                   Object.values(filters).some((f) =>
                     typeof f === "string" ? f : Object.values(f).some((v) => v)
                   )) && (
-                  <button
-                    onClick={clearFilters}
-                    className="flex items-center space-x-2 text-red-600 hover:text-red-700 font-medium"
-                  >
-                    <X className="w-4 h-4" />
-                    <span>Clear All</span>
-                  </button>
-                )}
+                    <button
+                      onClick={clearFilters}
+                      className="flex items-center space-x-2 text-red-600 hover:text-red-700 font-medium"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Clear All</span>
+                    </button>
+                  )}
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-gray-600">
@@ -514,7 +528,7 @@ const ProductList = ({
                       <option value="">All Categories</option>
                       {uniqueCategories.map((category) => (
                         <option key={category} value={category}>
-                          {category}
+                          {getCategoryLabel(category)}
                         </option>
                       ))}
                     </select>
@@ -645,13 +659,12 @@ const ProductList = ({
                   className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                 />
               </th>
-              <SortableHeader sortKey="id">ID</SortableHeader>
-              <SortableHeader sortKey="itemName">Item Name</SortableHeader>
+              <SortableHeader sortKey="itemName">Product Info</SortableHeader>
+              <SortableHeader sortKey="brand">Brand / Part #</SortableHeader>
               <SortableHeader sortKey="price">Price</SortableHeader>
-              <SortableHeader sortKey="quantity">Quantity</SortableHeader>
+              <SortableHeader sortKey="stock">Stock</SortableHeader>
               <SortableHeader sortKey="vendorName">Vendor</SortableHeader>
-              <SortableHeader sortKey="category">Category</SortableHeader>
-              <SortableHeader sortKey="datePosted">Date Posted</SortableHeader>
+              <SortableHeader sortKey="categoryId">Category</SortableHeader>
               <SortableHeader sortKey="status">Status</SortableHeader>
               <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700 uppercase tracking-wider">
                 Actions
@@ -680,9 +693,8 @@ const ProductList = ({
               currentItems.map((item, index) => (
                 <tr
                   key={item.id || index}
-                  className={`hover:bg-gray-50 transition-colors ${
-                    selectedItems.includes(item.id) ? "bg-yellow-50" : ""
-                  }`}
+                  className={`hover:bg-gray-50 transition-colors ${selectedItems.includes(item.id) ? "bg-yellow-50" : ""
+                    }`}
                 >
                   <td className="px-6 py-4">
                     <input
@@ -692,24 +704,37 @@ const ProductList = ({
                       className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {item.id || "--"}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 flex-shrink-0 mr-3">
+                        <img
+                          className="h-10 w-10 rounded-lg object-cover border border-gray-100 shadow-xs"
+                          src={item.mainImage?.url || item.mainImage || "https://via.placeholder.com/150"}
+                          alt={item.itemName}
+                        />
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-gray-900 line-clamp-1">
+                          {item.itemName || "--"}
+                        </div>
+                        <div className="text-[10px] text-gray-400 font-mono">
+                          {item.id || "--"}
+                        </div>
+                      </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {item.itemName || "--"}
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900 font-medium">{item.brand || "N/A"}</div>
+                    <div className="text-[11px] text-gray-400">{item.partNumber || "No Part #"}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-green-600">
-                      ${item.price?.toFixed(2) || "0.00"}
+                      GHC {item.price?.toFixed(2) || "0.00"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {item.quantity || 0}
+                      {item.stock !== undefined ? item.stock : (item.quantity || 0)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -719,7 +744,7 @@ const ProductList = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {item.category || "N/A"}
+                      {CATEGORIES.find(c => c.id === (item.categoryId || item.category))?.label || (item.categoryId || item.category || "N/A")}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -728,13 +753,33 @@ const ProductList = ({
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        item.status
-                      )}`}
-                    >
-                      {item.status || "Unknown"}
-                    </span>
+                    <div className="flex flex-col space-y-1">
+                      {(() => {
+                        const stock = item.stock !== undefined ? item.stock : (item.quantity || 0);
+                        let status = item.status;
+                        if (!status) {
+                          if (stock === 0) status = "Out of Stock";
+                          else if (stock <= 10) status = "Low Stock";
+                          else status = "In Stock";
+                        }
+                        return (
+                          <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full text-center ${getStatusColor(status)}`}>
+                            {status}
+                          </span>
+                        );
+                      })()}
+                      <div className="flex flex-wrap gap-1">
+                        {item.featured && (
+                          <span className="px-1.5 py-0.5 text-[9px] font-bold bg-amber-100 text-amber-700 rounded-sm">⭐ FEAT</span>
+                        )}
+                        {item.newProduct && (
+                          <span className="px-1.5 py-0.5 text-[9px] font-bold bg-blue-100 text-blue-700 rounded-sm">🆕 NEW</span>
+                        )}
+                        {item.hotProduct && (
+                          <span className="px-1.5 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 rounded-sm">🔥 HOT</span>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-2">
@@ -781,11 +826,10 @@ const ProductList = ({
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                currentPage === 1
-                  ? "text-gray-400 cursor-not-allowed bg-gray-100"
-                  : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === 1
+                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
+                }`}
             >
               Previous
             </button>
@@ -807,11 +851,10 @@ const ProductList = ({
                 <button
                   key={pageNumber}
                   onClick={() => setCurrentPage(pageNumber)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    currentPage === pageNumber
-                      ? "bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-md"
-                      : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === pageNumber
+                    ? "bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-md"
+                    : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
+                    }`}
                 >
                   {pageNumber}
                 </button>
@@ -823,11 +866,10 @@ const ProductList = ({
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                currentPage === totalPages
-                  ? "text-gray-400 cursor-not-allowed bg-gray-100"
-                  : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
+                }`}
             >
               Next
             </button>

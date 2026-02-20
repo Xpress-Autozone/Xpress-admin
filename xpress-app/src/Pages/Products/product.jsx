@@ -1,22 +1,32 @@
 import React, { useState } from "react";
-import { ArrowLeft, Upload, X } from "lucide-react";
+import { ArrowLeft, Upload, X, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import AlertModal from "../../components/AlertModal";
-import LoadingSpinner from "../../components/LoadingSpinner";
+import AlertModal from "../../Components/AlertModal";
+import LoadingSpinner from "../../Components/LoadingSpinner";
+import { CATEGORIES } from "../../constants/categories";
+
+import useVendors from "../../hooks/useVendors";
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const { vendors, loading: vendorsLoading } = useVendors();
   const [formData, setFormData] = useState({
     itemName: "",
     vendorId: "",
     price: "",
     condition: "new",
-    quantity: "",
+    stock: "",
     description: "",
-    category: "",
-    priority: 1,
-    displayOnPage: true,
+    categoryId: "",
+    brand: "",
+    partNumber: "",
+    specifications: [{ label: "", value: "" }],
+    compatibility: [""],
+    featured: false,
+    newProduct: false,
+    hotProduct: false,
+    showOnHome: true,
   });
   const { user, token } = useSelector((state) => state.auth);
 
@@ -74,12 +84,54 @@ const AddProduct = () => {
     setAlert({ ...alert, isOpen: false });
   };
 
+  // Specification field handlers
+  const handleSpecChange = (index, field, value) => {
+    const updated = [...formData.specifications];
+    updated[index][field] = value;
+    setFormData((prev) => ({ ...prev, specifications: updated }));
+  };
+
+  const addSpec = () => {
+    setFormData((prev) => ({
+      ...prev,
+      specifications: [...prev.specifications, { label: "", value: "" }],
+    }));
+  };
+
+  const removeSpec = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      specifications: prev.specifications.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Vehicle compatibility handlers
+  const handleCompatChange = (index, value) => {
+    const updated = [...formData.compatibility];
+    updated[index] = value;
+    setFormData((prev) => ({ ...prev, compatibility: updated }));
+  };
+
+  const addCompat = () => {
+    setFormData((prev) => ({
+      ...prev,
+      compatibility: [...prev.compatibility, ""],
+    }));
+  };
+
+  const removeCompat = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      compatibility: prev.compatibility.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async () => {
-    if (!formData.itemName || !formData.price || !formData.quantity) {
+    if (!formData.itemName || !formData.price || !formData.stock || !formData.categoryId) {
       showAlert(
         "warning",
         "Missing Information",
-        "Please fill in all required fields."
+        "Please fill in all required fields (Name, Price, Stock, Category)."
       );
       return;
     }
@@ -90,12 +142,18 @@ const AddProduct = () => {
     data.append("itemName", formData.itemName);
     data.append("vendorId", formData.vendorId);
     data.append("price", Number(formData.price));
-    data.append("quantity", Number(formData.quantity));
+    data.append("quantity", Number(formData.stock));
     data.append("condition", formData.condition);
     data.append("description", formData.description);
-    data.append("category", formData.category);
-    data.append("priority", Number(formData.priority));
-    data.append("displayOnPage", formData.displayOnPage);
+    data.append("categoryId", formData.categoryId);
+    data.append("brand", formData.brand);
+    data.append("partNumber", formData.partNumber);
+    data.append("specifications", JSON.stringify(formData.specifications.filter(s => s.label && s.value)));
+    data.append("compatibility", JSON.stringify(formData.compatibility.filter(c => c)));
+    data.append("featured", formData.featured);
+    data.append("newProduct", formData.newProduct);
+    data.append("hotProduct", formData.hotProduct);
+    data.append("showOnHome", formData.showOnHome);
 
     images.forEach((img, index) => {
       if (index === 0) {
@@ -135,8 +193,8 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="flex  mt-20">
-      <div className=" p-6 h-screen w-full">
+    <div className="flex mt-20">
+      <div className="p-6 h-screen w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center">
@@ -162,7 +220,7 @@ const AddProduct = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Item Name
+                      Item Name *
                     </label>
                     <input
                       type="text"
@@ -176,21 +234,27 @@ const AddProduct = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Vendor ID
+                      Vendor *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="vendorId"
                       value={formData.vendorId}
                       onChange={handleInputChange}
-                      placeholder="e.g. 12345XYZ"
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
-                    />
+                    >
+                      <option value="">Select Vendor</option>
+                      {vendors.map(vendor => (
+                        <option key={vendor.uid || vendor.id} value={vendor.uid || vendor.id}>
+                          {vendor.displayName || vendor.userName || vendor.email}
+                        </option>
+                      ))}
+                    </select>
+                    {vendorsLoading && <p className="text-xs text-gray-400 mt-1">Loading vendors...</p>}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Price ($)
+                      Price (GHC) *
                     </label>
                     <input
                       type="number"
@@ -219,12 +283,12 @@ const AddProduct = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Quantity
+                      Stock Amount *
                     </label>
                     <input
                       type="number"
-                      name="quantity"
-                      value={formData.quantity}
+                      name="stock"
+                      value={formData.stock}
                       onChange={handleInputChange}
                       placeholder="e.g. 100"
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
@@ -233,27 +297,125 @@ const AddProduct = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Category
+                      Category *
                     </label>
                     <select
-                      name="category"
-                      value={formData.category}
+                      name="categoryId"
+                      value={formData.categoryId}
                       onChange={handleInputChange}
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                     >
                       <option value="">Select category</option>
-                      <option value="engine">Engine Parts</option>
-                      <option value="brake">Brake System</option>
-                      <option value="transmission">Transmission</option>
-                      <option value="suspension">Suspension</option>
-                      <option value="electrical">Electrical</option>
-                      <option value="body">Body Parts</option>
-                      <option value="interior">Interior</option>
-                      <option value="tools">Tools</option>
-                      <option value="accessories">Accessories</option>
-                      <option value="other">Other</option>
+                      {CATEGORIES.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.label}</option>
+                      ))}
                     </select>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Brand
+                    </label>
+                    <input
+                      type="text"
+                      name="brand"
+                      value={formData.brand}
+                      onChange={handleInputChange}
+                      placeholder="e.g. Bosch"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Part Number
+                    </label>
+                    <input
+                      type="text"
+                      name="partNumber"
+                      value={formData.partNumber}
+                      onChange={handleInputChange}
+                      placeholder="e.g. XP-9001"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Technical Specifications Section */}
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Technical Specifications</h2>
+                  <button
+                    onClick={addSpec}
+                    className="text-sm font-bold text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Add Spec
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {Array.isArray(formData.specifications) && formData.specifications.map((spec, index) => (
+                    <div key={index} className="flex gap-4 items-end">
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Label</label>
+                        <input
+                          type="text"
+                          value={spec.label}
+                          onChange={(e) => handleSpecChange(index, "label", e.target.value)}
+                          placeholder="e.g. Voltage"
+                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Value</label>
+                        <input
+                          type="text"
+                          value={spec.value}
+                          onChange={(e) => handleSpecChange(index, "value", e.target.value)}
+                          placeholder="e.g. 12V"
+                          className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
+                        />
+                      </div>
+                      <button
+                        onClick={() => removeSpec(index)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Vehicle Compatibility Section */}
+              <div>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">Vehicle Compatibility</h2>
+                  <button
+                    onClick={addCompat}
+                    className="text-sm font-bold text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
+                  >
+                    <Plus className="w-4 h-4" /> Add Vehicle
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Array.isArray(formData.compatibility) && formData.compatibility.map((item, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <input
+                        type="text"
+                        value={item}
+                        onChange={(e) => handleCompatChange(index, e.target.value)}
+                        placeholder="e.g. Toyota Camry 2019-2022"
+                        className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
+                      />
+                      <button
+                        onClick={() => removeCompat(index)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -319,49 +481,66 @@ const AddProduct = () => {
                 </div>
               </div>
 
-              {/* Settings Section */}
+              {/* Display Flags Section */}
               <div>
                 <h2 className="text-xl font-bold text-gray-900 mb-6">
-                  Settings
+                  Display Settings (Xplore Page)
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Priority */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Priority
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <span className="text-sm font-medium text-gray-700">Featured</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="featured"
+                        checked={formData.featured}
+                        onChange={handleInputChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
                     </label>
-                    <select
-                      name="priority"
-                      value={formData.priority}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
-                    >
-                      <option value="1">High</option>
-                      <option value="2">Higher</option>
-                      <option value="3">Highest</option>
-                    </select>
                   </div>
 
-                  {/* Display Toggle */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Display on Main Page
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <span className="text-sm font-medium text-gray-700">New Arrival</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="newProduct"
+                        checked={formData.newProduct}
+                        onChange={handleInputChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
                     </label>
-                    <div className="flex items-center space-x-4">
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          name="displayOnPage"
-                          checked={formData.displayOnPage}
-                          onChange={handleInputChange}
-                          className="sr-only peer"
-                        />
-                        <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-yellow-400"></div>
-                      </label>
-                      <span className="text-sm font-medium text-gray-700">
-                        {formData.displayOnPage ? "Enabled" : "Disabled"}
-                      </span>
-                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <span className="text-sm font-medium text-gray-700">Hot Product</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="hotProduct"
+                        checked={formData.hotProduct}
+                        onChange={handleInputChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <span className="text-sm font-medium text-gray-700">Show on Home</span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="showOnHome"
+                        checked={formData.showOnHome}
+                        onChange={handleInputChange}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
+                    </label>
                   </div>
                 </div>
               </div>

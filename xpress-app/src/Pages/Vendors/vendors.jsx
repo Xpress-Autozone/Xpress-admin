@@ -1,4 +1,4 @@
-import VenderList from "../../Components/Ui/VendorList/vendorList";
+import VendorList from "../../Components/Ui/VendorList/vendorList";
 import { useNavigate } from 'react-router-dom';
 import useVendors from "../../hooks/useVendors";
 import LoadingSpinner from "../../Components/LoadingSpinner";
@@ -6,7 +6,7 @@ import EmptyVendorState from "../../Components/EmptyVendorState";
 
 const Vendor = () => {
   const navigate = useNavigate();
-  const { vendors, loading, error } = useVendors();
+  const { vendors, loading, error, deleteVendor } = useVendors();
 
   if (loading) {
     return (
@@ -34,14 +34,21 @@ const Vendor = () => {
     );
   }
 
+  const handleDelete = async (item) => {
+    const result = await deleteVendor(item.id);
+    if (!result.success) {
+      alert("Failed to delete vendor: " + result.error);
+    }
+  };
+
   return (
     <div className="p-6">
-      <VenderList
+      <VendorList
         title='Vendors'
         data={vendors}
         onAddItem={() => navigate("/add-vendors")}
-        onEditItem={(item) => console.log('[Vendors] Edit item:', item)}
-        onDeleteItem={(item) => console.log('[Vendors] Delete item:', item)}
+        onEditItem={(item) => navigate(`/edit-vendor/${item.id}`)}
+        onDeleteItem={handleDelete}
       />
     </div>
   );

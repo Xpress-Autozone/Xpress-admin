@@ -20,7 +20,6 @@ function AddVendor() {
     displayName: "",
     email: "",
     phoneNumber: "",
-    password: "VendorPassword123!",
     location: "",
     company: "",
     website: "",
@@ -86,20 +85,14 @@ function AddVendor() {
       console.log("[AddVendor] Creating vendor with email:", formData.email);
 
       const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/register",
+        "https://xpress-backend-eeea.onrender.com/vendors",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             ...(token && { Authorization: `Bearer ${token}` }),
           },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-            displayName: formData.displayName,
-            phoneNumber: formData.phoneNumber,
-            role: "vendor",
-          }),
+          body: JSON.stringify(formData),
         }
       );
 

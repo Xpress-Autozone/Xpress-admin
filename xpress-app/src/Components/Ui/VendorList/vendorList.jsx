@@ -248,8 +248,7 @@ const VendorList = ({
       filteredData
         .map(
           (row) =>
-            `${row.id},${row.name},${row.email},${row.phone},${row.location},${
-              row.priority
+            `${row.id},${row.name},${row.email},${row.phone},${row.location},${row.priority
             },${row.isActive ? "Active" : "Inactive"},${row.datePublished}`
         )
         .join("\n");
@@ -367,18 +366,16 @@ const VendorList = ({
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${
-                    showFilters
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-white text-gray-700 hover:bg-gray-50"
-                  } border border-gray-300`}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 font-medium ${showFilters
+                    ? "bg-yellow-100 text-yellow-700"
+                    : "bg-white text-gray-700 hover:bg-gray-50"
+                    } border border-gray-300`}
                 >
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform ${
-                      showFilters ? "rotate-180" : ""
-                    }`}
+                    className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -386,14 +383,14 @@ const VendorList = ({
                   Object.values(filters).some((f) =>
                     typeof f === "string" ? f : Object.values(f).some((v) => v)
                   )) && (
-                  <button
-                    onClick={clearFilters}
-                    className="flex items-center space-x-2 text-red-600 hover:text-red-700 font-medium"
-                  >
-                    <X className="w-4 h-4" />
-                    <span>Clear All</span>
-                  </button>
-                )}
+                    <button
+                      onClick={clearFilters}
+                      className="flex items-center space-x-2 text-red-600 hover:text-red-700 font-medium"
+                    >
+                      <X className="w-4 h-4" />
+                      <span>Clear All</span>
+                    </button>
+                  )}
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-gray-600">
@@ -471,7 +468,7 @@ const VendorList = ({
                         <option key={priority} value={priority}>
                           {priority
                             ? priority.charAt(0).toUpperCase() +
-                              priority.slice(1)
+                            priority.slice(1)
                             : "Unknown"}
                         </option>
                       ))}
@@ -590,9 +587,8 @@ const VendorList = ({
               currentItems.map((item, index) => (
                 <tr
                   key={item.id || index}
-                  className={`hover:bg-gray-50 transition-colors ${
-                    selectedItems.includes(item.id) ? "bg-yellow-50" : ""
-                  }`}
+                  className={`hover:bg-gray-50 transition-colors ${selectedItems.includes(item.id) ? "bg-yellow-50" : ""
+                    }`}
                 >
                   <td className="px-6 py-4">
                     <input
@@ -609,7 +605,7 @@ const VendorList = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      {item.name || "--"}
+                      {item.displayName || item.name || "--"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -640,7 +636,7 @@ const VendorList = ({
                     >
                       {item.priority
                         ? item.priority.charAt(0).toUpperCase() +
-                          item.priority.slice(1)
+                        item.priority.slice(1)
                         : "Medium"}
                     </span>
                   </td>
@@ -698,11 +694,10 @@ const VendorList = ({
             <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                currentPage === 1
-                  ? "text-gray-400 cursor-not-allowed bg-gray-100"
-                  : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === 1
+                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
+                }`}
             >
               Previous
             </button>
@@ -724,11 +719,10 @@ const VendorList = ({
                 <button
                   key={pageNumber}
                   onClick={() => setCurrentPage(pageNumber)}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    currentPage === pageNumber
-                      ? "bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-md"
-                      : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
-                  }`}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === pageNumber
+                    ? "bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-md"
+                    : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
+                    }`}
                 >
                   {pageNumber}
                 </button>
@@ -740,11 +734,10 @@ const VendorList = ({
                 setCurrentPage(Math.min(totalPages, currentPage + 1))
               }
               disabled={currentPage === totalPages}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                currentPage === totalPages
-                  ? "text-gray-400 cursor-not-allowed bg-gray-100"
-                  : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${currentPage === totalPages
+                ? "text-gray-400 cursor-not-allowed bg-gray-100"
+                : "text-gray-700 hover:bg-gray-200 bg-white border border-gray-300"
+                }`}
             >
               Next
             </button>

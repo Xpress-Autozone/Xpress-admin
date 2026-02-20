@@ -5,13 +5,13 @@ import DashboardLayout from "../DashBoardLayout/dashboardLayout"; // New compone
 
 const MainLayout = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename="/Xpress-admin/">
             <Routes>
                 {/* Public routes (no navbar) */}
-                <Route path="/login" element={<LoginPage/>} />
-                
+                <Route path="/login" element={<LoginPage />} />
+
                 {/* Protected routes with navbar and sidebar */}
-                <Route path="/*" element={<DashboardLayout/>} />
+                <Route path="/*" element={<DashboardLayout />} />
             </Routes>
         </BrowserRouter>
     );
