@@ -11,10 +11,10 @@ import {
 
 export const CATEGORIES = [
   {
-    id: 'body-parts',
+    id: 'body-chassis',
     label: 'Body & Parts',
     icon: Car,
-    slug: 'body-parts'
+    slug: 'body-chassis'
   },
   {
     id: 'engine-performance',
@@ -47,10 +47,10 @@ export const CATEGORIES = [
     slug: 'automotive-tools'
   },
   {
-    id: 'fluids-car-care',
+    id: 'fluids-care',
     label: 'Fluids & Car Care',
     icon: Droplet,
-    slug: 'fluids-car-care'
+    slug: 'fluids-care'
   },
   {
     id: 'cooling-ac',
