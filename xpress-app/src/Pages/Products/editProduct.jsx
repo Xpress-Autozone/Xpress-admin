@@ -73,12 +73,17 @@ const EditProduct = () => {
                     });
 
                     if (product.mainImage) {
-                        setExistingImages([{ id: 'main', url: product.mainImage, type: 'main' }]);
+                        const mainImageUrl = typeof product.mainImage === 'object' ? product.mainImage.url : product.mainImage;
+                        setExistingImages([{ id: 'main', url: mainImageUrl, type: 'main' }]);
                     }
                     if (product.additionalImages && product.additionalImages.length > 0) {
                         setExistingImages(prev => [
                             ...prev,
-                            ...product.additionalImages.map((url, i) => ({ id: `additional-${i}`, url, type: 'additional' }))
+                            ...product.additionalImages.map((img, i) => ({
+                                id: `additional-${i}`,
+                                url: typeof img === 'object' ? img.url : img,
+                                type: 'additional'
+                            }))
                         ]);
                     }
                 } else {
