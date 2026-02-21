@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import AlertModal from "../../Components/AlertModal";
+import { API_BASE_URL } from "../../config/api";
 
 function AddVendor() {
   const navigate = useNavigate();
@@ -84,17 +85,14 @@ function AddVendor() {
     try {
       console.log("[AddVendor] Creating vendor with email:", formData.email);
 
-      const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/vendors",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/vendors`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify(formData),
+      });
 
       console.log(`[AddVendor] Response status: ${response.status}`);
 

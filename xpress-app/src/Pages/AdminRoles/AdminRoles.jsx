@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { ArrowLeft, Shield } from "lucide-react";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import AlertModal from "../../Components/AlertModal";
+import { API_BASE_URL } from "../../config/api";
 
 const AdminRoles = () => {
   const navigate = useNavigate();
@@ -26,16 +27,13 @@ const AdminRoles = () => {
   const fetchUsers = async () => {
     try {
       console.log("[AdminRoles] Fetching all users");
-      const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/users",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
 
       console.log(`[AdminRoles] Response status: ${response.status}`);
 
@@ -63,17 +61,14 @@ const AdminRoles = () => {
     try {
       console.log(`[AdminRoles] Assigning role ${role} to user ${userId}`);
 
-      const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/users/role",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          body: JSON.stringify({ uid: userId, role }),
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/users/role`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ uid: userId, role }),
+      });
 
       console.log(
         `[AdminRoles] Role assignment response status: ${response.status}`

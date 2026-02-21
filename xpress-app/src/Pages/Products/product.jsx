@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import AlertModal from "../../Components/AlertModal";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import { CATEGORIES } from "../../constants/categories";
+import { API_BASE_URL } from "../../config/api";
 
 import useVendors from "../../hooks/useVendors";
 
@@ -127,11 +128,11 @@ const AddProduct = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.itemName || !formData.price || !formData.stock || !formData.categoryId) {
+    if (!formData.itemName || !formData.price || !formData.stock || !formData.categoryId || !formData.vendorId) {
       showAlert(
         "warning",
         "Missing Information",
-        "Please fill in all required fields (Name, Price, Stock, Category)."
+        "Please fill in all required fields (Name, Price, Stock, Category, and Vendor)."
       );
       return;
     }
@@ -145,7 +146,8 @@ const AddProduct = () => {
     data.append("quantity", Number(formData.stock));
     data.append("condition", formData.condition);
     data.append("description", formData.description);
-    data.append("categoryId", formData.categoryId);
+    data.append("category", formData.categoryId); // Backend expects 'category'
+    data.append("categoryId", formData.categoryId); // Backend might also use 'categoryId'
     data.append("brand", formData.brand);
     data.append("partNumber", formData.partNumber);
     data.append("specifications", JSON.stringify(formData.specifications.filter(s => s.label && s.value)));
@@ -164,16 +166,13 @@ const AddProduct = () => {
     });
 
     try {
-      const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/products",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: data,
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/products`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: data,
+      });
 
       const result = await response.json();
 

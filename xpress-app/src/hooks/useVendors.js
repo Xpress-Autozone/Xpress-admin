@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { API_BASE_URL } from "../config/api";
 
 const useVendors = () => {
   const [vendors, setVendors] = useState([]);
@@ -15,7 +16,7 @@ const useVendors = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch("https://xpress-backend-eeea.onrender.com/vendors", {
+      const response = await fetch(`${API_BASE_URL}/vendors`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -42,7 +43,7 @@ const useVendors = () => {
 
   const deleteVendor = async (id) => {
     try {
-      const response = await fetch(`https://xpress-backend-eeea.onrender.com/vendors/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/vendors/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -57,7 +58,7 @@ const useVendors = () => {
 
   const updateVendor = async (id, vendorData) => {
     try {
-      const response = await fetch(`https://xpress-backend-eeea.onrender.com/vendors/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/vendors/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

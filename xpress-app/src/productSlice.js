@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { API_BASE_URL } from "./config/api";
 
 // Async thunks for API calls
 export const fetchProducts = createAsyncThunk(
@@ -6,7 +7,7 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/products"
+        `${API_BASE_URL}/products?limit=1000`
       );
       const data = await response.json();
       if (!response.ok)
@@ -25,7 +26,7 @@ export const addProduct = createAsyncThunk(
       const { token } = getState().auth;
       const isFormData = productData instanceof FormData;
       const response = await fetch(
-        "https://xpress-backend-eeea.onrender.com/products",
+        `${API_BASE_URL}/products`,
         {
           method: "POST",
           headers: {
@@ -51,7 +52,7 @@ export const deleteProduct = createAsyncThunk(
     try {
       const { token } = getState().auth;
       const response = await fetch(
-        `https://xpress-backend-eeea.onrender.com/products/${id}`,
+        `${API_BASE_URL}/products/${id}`,
         {
           method: "DELETE",
           headers: {
@@ -79,7 +80,7 @@ export const updateProduct = createAsyncThunk(
       const isFormData = productData instanceof FormData;
 
       const response = await fetch(
-        `https://xpress-backend-eeea.onrender.com/products/${id}`,
+        `${API_BASE_URL}/products/${id}`,
         {
           method: "PUT",
           headers: {
@@ -135,7 +136,7 @@ const productSlice = createSlice({
       })
       // Delete Product
       .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.items = state.items.filter((item) => item.id !== action.payload);
+        state.items = state.items.filter((item) => (item._id || item.id) !== action.payload);
       })
       // Update Product
       .addCase(updateProduct.pending, (state) => {
@@ -143,7 +144,9 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.status = "succeeded";
-        const index = state.items.findIndex((item) => item.id === action.payload.id);
+        const index = state.items.findIndex(
+          (item) => (item._id || item.id) === (action.payload._id || action.payload.id)
+        );
         if (index !== -1) {
           state.items[index] = action.payload;
         }

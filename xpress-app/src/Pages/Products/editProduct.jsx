@@ -7,6 +7,7 @@ import LoadingSpinner from "../../Components/LoadingSpinner";
 import { CATEGORIES } from "../../constants/categories";
 import { updateProduct } from "../../productSlice";
 import useVendors from "../../hooks/useVendors";
+import { API_BASE_URL } from "../../config/api";
 
 const EditProduct = () => {
     const { id } = useParams();
@@ -48,7 +49,7 @@ const EditProduct = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const response = await fetch(`https://xpress-backend-eeea.onrender.com/products/${id}`);
+                const response = await fetch(`${API_BASE_URL}/products/${id}`);
                 const result = await response.json();
 
                 if (response.ok && result.data) {
@@ -139,11 +140,11 @@ const EditProduct = () => {
     };
 
     const handleSubmit = async () => {
-        if (!formData.itemName || !formData.price || !formData.stock || !formData.categoryId) {
+        if (!formData.itemName || !formData.price || !formData.stock || !formData.categoryId || !formData.vendorId) {
             showAlert(
                 "warning",
                 "Missing Information",
-                "Please fill in all required fields (Name, Price, Stock, Category)."
+                "Please fill in all required fields (Name, Price, Stock, Category, and Vendor)."
             );
             return;
         }
@@ -154,10 +155,11 @@ const EditProduct = () => {
         data.append("itemName", formData.itemName);
         data.append("vendorId", formData.vendorId);
         data.append("price", Number(formData.price));
-        data.append("stock", Number(formData.stock));
+        data.append("quantity", Number(formData.stock)); // Backend expects 'quantity'
         data.append("condition", formData.condition);
         data.append("description", formData.description);
-        data.append("categoryId", formData.categoryId);
+        data.append("category", formData.categoryId); // Backend expects 'category'
+        data.append("categoryId", formData.categoryId); // Backend might use 'categoryId'
         data.append("brand", formData.brand);
         data.append("partNumber", formData.partNumber);
         data.append("specifications", JSON.stringify(formData.specifications.filter(s => s.label && s.value)));

@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+import { API_BASE_URL } from "../config/api";
 
 const useDeleteProduct = () => {
   const { token } = useSelector((state) => state.auth);
@@ -9,7 +10,7 @@ const useDeleteProduct = () => {
         `[useDeleteProduct] Deleting product ${productId}, hardDelete: ${hardDelete}`
       );
 
-      const url = `https://xpress-backend-eeea.onrender.com/products/${productId}?hardDelete=${hardDelete}`;
+      const url = `${API_BASE_URL}/products/${productId}?hardDelete=${hardDelete}`;
       console.log(`[useDeleteProduct] Request URL: ${url}`);
 
       const response = await fetch(url, {

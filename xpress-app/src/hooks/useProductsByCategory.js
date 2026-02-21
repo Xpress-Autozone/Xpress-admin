@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { API_BASE_URL } from "../config/api";
 
 const useProductsByCategory = (category, refreshKey = 0) => {
   const [products, setProducts] = useState([]);
@@ -21,7 +22,7 @@ const useProductsByCategory = (category, refreshKey = 0) => {
         );
         console.log(`[useProductsByCategory] Auth token available: ${!!token}`);
 
-        const url = `https://xpress-backend-eeea.onrender.com/products/category/${encodeURIComponent(
+        const url = `${API_BASE_URL}/products/category/${encodeURIComponent(
           category
         )}`;
         console.log(`[useProductsByCategory] Request URL: ${url}`);
@@ -46,8 +47,7 @@ const useProductsByCategory = (category, refreshKey = 0) => {
 
         const data = await response.json();
         console.log(
-          `[useProductsByCategory] Successfully fetched ${
-            data.data?.length || 0
+          `[useProductsByCategory] Successfully fetched ${data.data?.length || 0
           } products`
         );
         console.log(`[useProductsByCategory] Response data:`, data);

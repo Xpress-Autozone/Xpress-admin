@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import AlertModal from "../../Components/AlertModal";
 import useVendors from "../../hooks/useVendors";
+import { API_BASE_URL } from "../../config/api";
 
 function EditVendor() {
     const { id } = useParams();
@@ -38,7 +39,7 @@ function EditVendor() {
     useEffect(() => {
         const fetchVendorData = async () => {
             try {
-                const response = await fetch(`https://xpress-backend-eeea.onrender.com/vendors/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/vendors/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const result = await response.json();

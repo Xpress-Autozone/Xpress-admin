@@ -16,6 +16,9 @@ import DeleteConfirmationModal from "../DeleteConfirmModal/DeleteConfirmationMod
 import useDeleteProduct from "../../../hooks/useDeleteProduct";
 import AlertModal from "../../AlertModal";
 import { CATEGORIES } from "../../../constants/categories";
+
+const uniqueStatuses = ["In Stock", "Low Stock", "Out of Stock"];
+
 const ProductList = ({
   title = "Product Management",
   data = [],
@@ -30,7 +33,7 @@ const ProductList = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const [filters, setFilters] = useState({
-    priceRange: { min: "" },
+    priceRange: { min: "", max: "" },
     vendor: "",
     dateRange: { start: "", end: "" },
     quantityRange: { min: "", max: "" },
@@ -109,13 +112,14 @@ const ProductList = ({
 
   const tableData = data.length > 0 ? data : defaultData;
 
-  // Get unique values for filter dropdowns - FIXED: Filter out undefined values
-  const uniqueVendors = [
-    ...new Set(tableData.map((item) => item.vendorName).filter(Boolean)),
-  ];
-  const uniqueCategories = [
-    ...new Set(tableData.map((item) => item.categoryId || item.category).filter(Boolean)),
-  ];
+  // Get unique values for filter dropdowns - Derived from full dataset
+  const uniqueVendors = useMemo(() => {
+    return [...new Set(tableData.map((item) => item.vendorName).filter(Boolean))].sort();
+  }, [tableData]);
+
+  const uniqueCategories = useMemo(() => {
+    return [...new Set(tableData.map((item) => item.categoryId || item.category).filter(Boolean))].sort();
+  }, [tableData]);
 
   // Helper to get category label
   const getCategoryLabel = (id) => {
@@ -125,17 +129,20 @@ const ProductList = ({
   // Advanced filtering and searching
   const filteredData = useMemo(() => {
     let filtered = tableData.filter((item) => {
-      // Search filter
+      // Search filter - prioritized fields
+      const searchTerms = searchTerm.toLowerCase().trim();
       const searchMatch =
-        !searchTerm ||
-        Object.values(item).some((value) =>
-          value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        !searchTerms ||
+        [item.itemName, item.brand, item.partNumber]
+          .some((value) =>
+            value?.toString().toLowerCase().includes(searchTerms)
+          );
 
-      // Price range filter
-      const priceMatch =
-        !filters.priceRange.min ||
-        item.price >= parseFloat(filters.priceRange.min);
+      // Price range filter - strict numeric comparison
+      const itemPrice = parseFloat(item.price) || 0;
+      const minPrice = filters.priceRange.min !== "" ? parseFloat(filters.priceRange.min) : -Infinity;
+      const maxPrice = filters.priceRange.max !== "" ? parseFloat(filters.priceRange.max) : Infinity;
+      const priceMatch = itemPrice >= minPrice && itemPrice <= maxPrice;
 
       // Vendor filter
       const vendorMatch = !filters.vendor || item.vendorName === filters.vendor;
@@ -145,7 +152,7 @@ const ProductList = ({
         !filters.category || (item.categoryId || item.category) === filters.category;
 
       // Status filter
-      const itemStock = item.stock || item.quantity || 0;
+      const itemStock = Number(item.stock ?? item.quantity ?? 0);
       const derivedStatus = item.status || (itemStock > 10 ? "In Stock" : itemStock > 0 ? "Low Stock" : "Out of Stock");
       const statusMatch = !filters.status || derivedStatus === filters.status;
 
@@ -156,12 +163,10 @@ const ProductList = ({
         (!filters.dateRange.end ||
           new Date(item.datePosted) <= new Date(filters.dateRange.end));
 
-      // Quantity range filter
-      const quantityMatch =
-        (!filters.quantityRange.min ||
-          item.quantity >= parseInt(filters.quantityRange.min)) &&
-        (!filters.quantityRange.max ||
-          item.quantity <= parseInt(filters.quantityRange.max));
+      // Quantity range filter - strictly respect Min/Max
+      const minQty = filters.quantityRange.min !== "" ? parseInt(filters.quantityRange.min) : -Infinity;
+      const maxQty = filters.quantityRange.max !== "" ? parseInt(filters.quantityRange.max) : Infinity;
+      const quantityMatch = itemStock >= minQty && itemStock <= maxQty;
 
       return (
         searchMatch &&
@@ -223,7 +228,7 @@ const ProductList = ({
 
   const clearFilters = () => {
     setFilters({
-      priceRange: { min: "" },
+      priceRange: { min: "", max: "" },
       vendor: "",
       dateRange: { start: "", end: "" },
       quantityRange: { min: "", max: "" },
@@ -253,11 +258,14 @@ const ProductList = ({
   const exportData = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      "ID,Item Name,Price,Quantity,Vendor,Date Posted,Category,Status\n" +
+      "ID,Item Name,Brand,Part Number,Price,Quantity,Vendor,Date Posted,Category,Status\n" +
       filteredData
         .map(
-          (row) =>
-            `${row.id},${row.itemName},${row.price},${row.quantity},${row.vendorName},${row.datePosted},${row.category},${row.status}`
+          (row) => {
+            const stock = row.stock !== undefined ? row.stock : (row.quantity || 0);
+            const status = row.status || (stock > 10 ? "In Stock" : stock > 0 ? "Low Stock" : "Out of Stock");
+            return `${row.id},${row.itemName},${row.brand || ""},${row.partNumber || ""},${row.price},${stock},${row.vendorName},${row.datePosted},${row.category},${status}`;
+          }
         )
         .join("\n");
 
@@ -277,8 +285,9 @@ const ProductList = ({
 
   const handleConfirmDelete = async () => {
     try {
-      console.log('[ProductList] Deleting product:', itemToDelete.id);
-      await deleteProduct(itemToDelete.id, false);
+      const productId = itemToDelete._id || itemToDelete.id;
+      console.log('[ProductList] Deleting product:', productId);
+      await deleteProduct(productId, false);
 
       setAlert({
         isOpen: true,
@@ -478,6 +487,21 @@ const ProductList = ({
                             priceRange: {
                               ...prev.priceRange,
                               min: e.target.value,
+                            },
+                          }))
+                        }
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none text-sm"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={filters.priceRange.max}
+                        onChange={(e) =>
+                          setFilters((prev) => ({
+                            ...prev,
+                            priceRange: {
+                              ...prev.priceRange,
+                              max: e.target.value,
                             },
                           }))
                         }
