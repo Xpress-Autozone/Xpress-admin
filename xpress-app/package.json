@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://xpress-autozone.github.io/Xpress-admin",
+  "homepage": "https://xpressautozone.com/Xpress-admin",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
