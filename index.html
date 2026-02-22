@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/Xpress-admin/favicon.png" />
+  <link rel="icon" type="image/png" href="/admin/favicon.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Xpress Autozone Admin</title>
   <meta name="description" content="Xpress Autozone Admin Panel - Manage inventory, vendors, and categories." />
@@ -13,7 +13,7 @@
       var redirect = sessionStorage.redirect;
       delete sessionStorage.redirect;
       if (redirect) {
-        var adminPrefix = 'Xpress-admin';
+        var adminPrefix = 'admin';
         if (redirect.toLowerCase().startsWith(adminPrefix.toLowerCase())) {
           var path = redirect.slice(adminPrefix.length);
           if (path.startsWith('/')) path = path.slice(1);
@@ -22,8 +22,8 @@
       }
     })();
   </script>
-  <script type="module" crossorigin src="/Xpress-admin/assets/index-D8e6TIJr.js"></script>
-  <link rel="stylesheet" crossorigin href="/Xpress-admin/assets/index-DNJcqA9S.css">
+  <script type="module" crossorigin src="/admin/assets/index-R-cgG7_k.js"></script>
+  <link rel="stylesheet" crossorigin href="/admin/assets/index-DNJcqA9S.css">
 </head>
 
 <body>
