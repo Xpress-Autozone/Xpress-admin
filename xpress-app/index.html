@@ -8,20 +8,6 @@
   <title>Xpress Autozone Admin</title>
   <meta name="description" content="Xpress Autozone Admin Panel - Manage inventory, vendors, and categories." />
   <meta name="theme-color" content="#ffffff" />
-  <script type="text/javascript">
-    (function () {
-      var redirect = sessionStorage.redirect;
-      delete sessionStorage.redirect;
-      if (redirect) {
-        var adminPrefix = 'admin';
-        if (redirect.toLowerCase().startsWith(adminPrefix.toLowerCase())) {
-          var path = redirect.slice(adminPrefix.length);
-          if (path.startsWith('/')) path = path.slice(1);
-          window.history.replaceState(null, null, '/' + adminPrefix + '/' + path);
-        }
-      }
-    })();
-  </script>
 </head>
 
 <body>
