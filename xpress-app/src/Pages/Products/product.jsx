@@ -469,7 +469,7 @@ const AddProduct = () => {
                           />
                           <button
                             onClick={() => removeImage(image.id)}
-                            className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-yellow-400 transition-colors opacity-0 group-hover:opacity-100"
+                            className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-yellow-400 shadow-sm transition-colors"
                           >
                             <X className="w-4 h-4" />
                           </button>

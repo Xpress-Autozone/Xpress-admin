@@ -132,6 +132,10 @@ const EditProduct = () => {
         setImages((prev) => prev.filter((img) => img.id !== id));
     };
 
+    const removeExistingImage = (id) => {
+        setExistingImages((prev) => prev.filter((img) => img.id !== id));
+    };
+
     const handleBack = () => {
         navigate(-1);
     };
@@ -182,6 +186,13 @@ const EditProduct = () => {
                 data.append("additionalImages", img.file);
             }
         });
+
+        // Handle existing images state for granular deletion in backend
+        const mainImage = existingImages.find(img => img.type === 'main');
+        const additionalImages = existingImages.filter(img => img.type === 'additional');
+
+        data.append("existingMainImage", mainImage ? JSON.stringify(mainImage) : "null");
+        data.append("existingAdditionalImages", JSON.stringify(additionalImages));
 
         try {
             const actionResult = await dispatch(updateProduct({ id, productData: data }));
@@ -505,6 +516,12 @@ const EditProduct = () => {
                                                         {image.type === 'main' && (
                                                             <span className="absolute top-1 left-1 bg-yellow-400 text-white text-[10px] px-1.5 py-0.5 rounded font-bold uppercase">Main</span>
                                                         )}
+                                                        <button
+                                                            onClick={() => removeExistingImage(image.id)}
+                                                            className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-yellow-400 shadow-sm transition-colors"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
                                                     </div>
                                                 ))}
                                             </div>
@@ -545,7 +562,7 @@ const EditProduct = () => {
                                                         />
                                                         <button
                                                             onClick={() => removeNewImage(image.id)}
-                                                            className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-yellow-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                            className="absolute -top-2 -right-2 bg-yellow-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-yellow-400 shadow-sm transition-colors"
                                                         >
                                                             <X className="w-4 h-4" />
                                                         </button>
