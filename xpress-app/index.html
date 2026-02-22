@@ -1,15 +1,32 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Xpress Autozone Admin</title>
-    <meta name="description" content="Xpress Autozone Admin Panel - Manage inventory, vendors, and categories." />
-    <meta name="theme-color" content="#ffffff" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Xpress Autozone Admin</title>
+  <meta name="description" content="Xpress Autozone Admin Panel - Manage inventory, vendors, and categories." />
+  <meta name="theme-color" content="#ffffff" />
+  <script type="text/javascript">
+    (function () {
+      var redirect = sessionStorage.redirect;
+      delete sessionStorage.redirect;
+      if (redirect) {
+        var adminPrefix = 'Xpress-admin';
+        if (redirect.toLowerCase().startsWith(adminPrefix.toLowerCase())) {
+          var path = redirect.slice(adminPrefix.length);
+          if (path.startsWith('/')) path = path.slice(1);
+          window.history.replaceState(null, null, '/' + adminPrefix + '/' + path);
+        }
+      }
+    })();
+  </script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
