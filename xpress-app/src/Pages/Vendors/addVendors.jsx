@@ -19,6 +19,7 @@ function AddVendor() {
 
   const [formData, setFormData] = useState({
     displayName: "",
+    vendorId: "",
     email: "",
     phoneNumber: "",
     location: "",
@@ -200,6 +201,21 @@ function AddVendor() {
                   Basic Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <User className="w-4 h-4 inline mr-2" />
+                      Vendor ID (Numerical)
+                    </label>
+                    <input
+                      type="number"
+                      name="vendorId"
+                      value={formData.vendorId}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 101"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       <User className="w-4 h-4 inline mr-2" />

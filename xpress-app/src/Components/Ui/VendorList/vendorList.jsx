@@ -600,7 +600,7 @@ const VendorList = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      {item.id || "--"}
+                      {item.vendorId || item.id || "--"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
