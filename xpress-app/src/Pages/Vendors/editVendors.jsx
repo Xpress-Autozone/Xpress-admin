@@ -217,15 +217,16 @@ function EditVendor() {
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <User className="w-4 h-4 inline mr-2" />
-                                            Vendor ID (Numerical)
+                                            Vendor ID (Unified)
                                         </label>
                                         <input
-                                            type="number"
+                                            type="text"
                                             name="vendorId"
                                             value={formData.vendorId}
                                             onChange={handleInputChange}
-                                            placeholder="e.g. 101"
-                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                                            placeholder="e.g. VND-A1B2C3"
+                                            readOnly
+                                            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors font-mono bg-gray-50"
                                         />
                                     </div>
 

@@ -13,9 +13,20 @@ import EditProduct from '../Pages/Products/editProduct';
 import Vendors from '../Pages/Vendors/vendors';
 import AddVendors from '../Pages/Vendors/addVendors';
 import AdminRoles from '../Pages/AdminRoles/AdminRoles';
+import SystemAdmins from '../Pages/AdminRoles/SystemAdmins';
 import EditVendor from '../Pages/Vendors/editVendors';
+import Orders from '../Pages/Sales/Orders';
+import Payments from '../Pages/Sales/Payments';
+import Customers from '../Pages/Management/Customers/Customers';
+import useFavicon from '../hooks/useFavicon';
+import { useNotifications } from '../Contexts/NotificationContext';
 
 function DashboardLayout() {
+  const { hasNewInquiries } = useNotifications();
+  
+  // Update browser icon based on notification status
+  useFavicon(hasNewInquiries);
+
   return (
     <ProtectedRoute>
       <div className="">
@@ -45,7 +56,15 @@ function DashboardLayout() {
               <Route path="/vendors" element={<Vendors />} />
               <Route path="/add-vendors" element={<AddVendors />} />
               <Route path="/edit-vendor/:id" element={<EditVendor />} />
+              <Route path="/admin-management" element={<SystemAdmins />} />
               <Route path="/admin-roles" element={<AdminRoles />} />
+
+              {/* Sales & Logistics */}
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/accounting" element={<Payments />} />
+
+              {/* CRM / User Management */}
+              <Route path="/customers" element={<Customers />} />
             </Routes>
           </main>
         </div>

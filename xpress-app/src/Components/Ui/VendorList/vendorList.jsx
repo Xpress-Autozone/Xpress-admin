@@ -19,6 +19,7 @@ import {
   User,
 } from "lucide-react";
 import DeleteConfirmationModal from "../DeleteConfirmModal/DeleteConfirmationModal";
+import { formatDisplayId } from "../../../utils/idGenerator";
 
 const VendorList = ({
   title = "Vendor Management",
@@ -599,8 +600,8 @@ const VendorList = ({
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {item.vendorId || item.id || "--"}
+                    <div className="text-sm font-semibold text-gray-900 font-mono">
+                      {item.vendorId || formatDisplayId(item.id || item.uid, 'vendor')}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

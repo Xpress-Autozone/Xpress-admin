@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Package, DollarSign, ShoppingCart, CheckCircle } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, CheckCircle, TrendingUp, TrendingDown, AlertTriangle, Info, Bell, Activity } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 const Overview = () => {
   // Stats data - can be fetched from API
@@ -30,6 +32,29 @@ const Overview = () => {
   // Loading states
   const [statsLoading, setStatsLoading] = useState(false);
   const [chartLoading, setChartLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('analytics');
+
+  // Select real products from Redux
+  const products = useSelector((state) => state.products.items || []);
+
+  const lowStockProducts = products.filter(p => {
+    const stock = p.stock || p.quantity || 0;
+    const threshold = p.lowStockThreshold || 10;
+    return stock <= threshold;
+  });
+
+  const performanceData = {
+    bestSelling: [
+      { name: 'Spark Plug XP-9', sales: 450, growth: '+12%', stock: 24 },
+      { name: 'Oil Filter XL', sales: 380, growth: '+8%', stock: 110 },
+      { name: 'Brake Pad Set', sales: 310, growth: '+15%', stock: 45 }
+    ],
+    lowPerforming: [
+      { name: 'Engine Belt B4', sales: 12, growth: '-5%', stock: 8 },
+      { name: 'Clutch Cable V2', sales: 5, growth: '-12%', stock: 2 },
+      { name: 'Air Intake G3', sales: 3, growth: '-20%', stock: 15 }
+    ]
+  };
 
   // Simulate API calls - replace with actual API calls
   useEffect(() => {
@@ -136,8 +161,41 @@ const Overview = () => {
           Refresh Data
         </button>
       </div>
-    <div className='h-1 w-16 bg-amber-300 mb-8'></div>
-      {/* Stats Cards */}
+      <div className='h-1 w-16 bg-amber-300 mb-6'></div>
+
+      {/* Tab Switcher */}
+      <div className="flex space-x-1 bg-white p-1 rounded-xl border border-gray-200 w-fit mb-8 shadow-sm">
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+            activeTab === 'analytics' ? 'bg-yellow-400 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          Analytics
+        </button>
+        <button
+          onClick={() => setActiveTab('alerts')}
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all relative ${
+            activeTab === 'alerts' ? 'bg-yellow-400 text-white shadow-md' : 'text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          <Bell className="w-4 h-4" />
+          Alerts
+          {lowStockProducts.length > 0 && (
+            <span className="absolute -top-1 -right-1 flex h-4 w-4">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[10px] items-center justify-center text-white">
+                {lowStockProducts.length}
+              </span>
+            </span>
+          )}
+        </button>
+      </div>
+
+      {activeTab === 'analytics' ? (
+        <>
+          {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           icon={Package}
@@ -246,6 +304,129 @@ const Overview = () => {
           </div>
         </div>
       </div>
+
+      {/* Product Performance Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+        {/* Best Selling */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+           <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-green-500" />
+                Best Selling Products
+              </h3>
+              <button className="text-sm text-yellow-600 font-bold hover:underline">View All</button>
+           </div>
+           <div className="space-y-4">
+              {performanceData.bestSelling.map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white text-gray-400 rounded flex items-center justify-center font-bold text-xs ring-1 ring-gray-100">#{i+1}</div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 text-left">{item.name}</p>
+                      <p className="text-[11px] text-gray-400 text-left">{item.sales} sold this month</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-green-600">{item.growth}</p>
+                    <p className="text-[11px] text-gray-400">Stock: {item.stock}</p>
+                  </div>
+                </div>
+              ))}
+           </div>
+        </div>
+
+        {/* Low Performing */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+           <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <TrendingDown className="w-5 h-5 text-red-500" />
+                Low Performing Products
+              </h3>
+              <button className="text-sm text-yellow-600 font-bold hover:underline">View All</button>
+           </div>
+           <div className="space-y-4">
+              {performanceData.lowPerforming.map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white text-gray-400 rounded flex items-center justify-center font-bold text-xs ring-1 ring-gray-100">#{i+1}</div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 text-left">{item.name}</p>
+                      <p className="text-[11px] text-gray-400 text-left">{item.sales} units moved</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-red-600">{item.growth}</p>
+                    <p className="text-[11px] text-gray-400">Stock: {item.stock}</p>
+                  </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      </div>
+    </>
+    ) : (
+      /* ALERTS TAB */
+      <div className="space-y-8 animate-in fade-in duration-500">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4 text-left">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+            Critical Stock Alerts
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {lowStockProducts.length === 0 ? (
+              <div className="col-span-full p-12 bg-white rounded-xl border border-dashed border-gray-300 text-center">
+                <CheckCircle className="w-12 h-12 text-green-200 mx-auto mb-4" />
+                <p className="text-gray-500 font-medium">No low stock items detected.</p>
+              </div>
+            ) : (
+              lowStockProducts.map((p) => (
+                <Link to={`/edit-product/${p.id || p._id || p.uid}`} key={p.uid || p.id} className="bg-white p-5 rounded-xl border border-gray-200 hover:border-red-400 transition-all group">
+                   <div className="flex justify-between items-start mb-4">
+                      <div className="p-2 bg-red-50 text-red-600 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors">
+                        <Package className="w-5 h-5" />
+                      </div>
+                      <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-100">CRITICAL</span>
+                   </div>
+                   <h4 className="text-sm font-bold text-gray-900 mb-1 text-left">{p.itemName}</h4>
+                   <div className="flex items-center justify-between mt-4">
+                      <div className="text-left text-xs font-medium text-gray-500">Current: <span className="text-red-600 font-bold">{p.stock || p.quantity || 0}</span></div>
+                      <div className="text-right text-xs font-medium text-gray-500">Limit: {p.lowStockThreshold || 10}</div>
+                   </div>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div>
+           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4 text-left">
+            <Info className="w-5 h-5 text-blue-500" />
+            System Notifications
+          </h2>
+          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            {[
+              { title: 'Admin "gokro" authenticated successfully (IP: 197.251.1x)', meta: '12 minutes ago', type: 'success' },
+              { title: 'Failed access login for "admin@xpress.com" (IP: 41.215.1x)', meta: '1 hour ago', type: 'warning' },
+              { title: 'Automatic Server Backup initiated & completed (Size: 340MB)', meta: '4 hours ago', type: 'info' },
+              { title: 'System Administrator password reset requested', meta: 'Yesterday', type: 'warning' },
+              { title: 'Cron: Midnight catalog cache rebuild executed successfully', meta: 'Yesterday', type: 'success' }
+            ].map((note, i) => (
+              <div key={i} className="flex items-center justify-between p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className={`w-2 h-2 rounded-full ${
+                    note.type === 'success' ? 'bg-green-400' : 
+                    note.type === 'warning' ? 'bg-orange-500' : 
+                    'bg-blue-400'
+                  }`}></div>
+                  <p className="text-sm font-medium text-gray-700 text-left">{note.title}</p>
+                </div>
+                <span className="text-xs text-gray-400 whitespace-nowrap">{note.meta}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
     </div>
   );
 };

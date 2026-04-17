@@ -18,12 +18,14 @@ const AddProduct = () => {
     price: "",
     condition: "new",
     stock: "",
+    lowStockThreshold: "",
     description: "",
     categoryId: "",
     brand: "",
     partNumber: "",
     specifications: [{ label: "", value: "" }],
     compatibility: [""],
+    tags: [],
     featured: false,
     newProduct: false,
     hotProduct: false,
@@ -42,10 +44,20 @@ const AddProduct = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    
+    setFormData((prev) => {
+      const newState = {
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      };
+
+      // Auto-calculate low stock threshold (10%) when stock changes
+      if (name === "stock" && value && !prev.lowStockThreshold) {
+        newState.lowStockThreshold = Math.floor(Number(value) * 0.1);
+      }
+
+      return newState;
+    });
   };
 
   const handleImageUpload = (e) => {
@@ -106,6 +118,25 @@ const AddProduct = () => {
     }));
   };
 
+  // Tag Handlers
+  const handleAddTag = (e) => {
+    if (e.key === 'Enter' && e.target.value.trim() !== '') {
+      e.preventDefault();
+      const newTag = e.target.value.trim();
+      if (!formData.tags.includes(newTag)) {
+        setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag] }));
+      }
+      e.target.value = '';
+    }
+  };
+
+  const removeTag = (tagToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
   // Vehicle compatibility handlers
   const handleCompatChange = (index, value) => {
     const updated = [...formData.compatibility];
@@ -144,6 +175,7 @@ const AddProduct = () => {
     data.append("vendorId", formData.vendorId);
     data.append("price", Number(formData.price));
     data.append("quantity", Number(formData.stock));
+    data.append("lowStockThreshold", Number(formData.lowStockThreshold || 10));
     data.append("condition", formData.condition);
     data.append("description", formData.description);
     data.append("category", formData.categoryId); // Backend expects 'category'
@@ -152,6 +184,7 @@ const AddProduct = () => {
     data.append("partNumber", formData.partNumber);
     data.append("specifications", JSON.stringify(formData.specifications.filter(s => s.label && s.value)));
     data.append("compatibility", JSON.stringify(formData.compatibility.filter(c => c)));
+    data.append("tags", JSON.stringify(formData.tags));
     data.append("featured", formData.featured);
     data.append("newProduct", formData.newProduct);
     data.append("hotProduct", formData.hotProduct);
@@ -296,6 +329,20 @@ const AddProduct = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Low Stock Alert Threshold (Def: 10%)
+                    </label>
+                    <input
+                      type="number"
+                      name="lowStockThreshold"
+                      value={formData.lowStockThreshold}
+                      onChange={handleInputChange}
+                      placeholder="e.g. 10"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Category *
                     </label>
                     <select
@@ -415,6 +462,33 @@ const AddProduct = () => {
                       </button>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Tags Section */}
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-6">Product Tags</h2>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {formData.tags?.map((tag, index) => (
+                      <span key={index} className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold border border-yellow-200">
+                        {tag}
+                        <button 
+                          onClick={(e) => { e.preventDefault(); removeTag(tag); }} 
+                          className="hover:text-yellow-900 focus:outline-none"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    onKeyDown={handleAddTag}
+                    placeholder="Type a tag and press Enter"
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-2">Press 'Enter' to add tags like "Summer Sale", "Premium", or "Bestseller"</p>
                 </div>
               </div>
 

@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import AlertModal from "../../Components/AlertModal";
 import { API_BASE_URL } from "../../config/api";
+import { generateUnifiedId } from "../../utils/idGenerator";
 
 function AddVendor() {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ function AddVendor() {
 
   const [formData, setFormData] = useState({
     displayName: "",
-    vendorId: "",
+    vendorId: generateUnifiedId('vendor'),
     email: "",
     phoneNumber: "",
     location: "",
@@ -203,16 +204,16 @@ function AddVendor() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      <User className="w-4 h-4 inline mr-2" />
-                      Vendor ID (Numerical)
+                       <User className="w-4 h-4 inline mr-2" />
+                      Vendor ID (Unified)
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       name="vendorId"
                       value={formData.vendorId}
                       onChange={handleInputChange}
-                      placeholder="e.g. 101"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                      placeholder="e.g. VND-A1B2C3"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors font-mono"
                     />
                   </div>
 

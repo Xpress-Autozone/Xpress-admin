@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, Menu, X, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Menu, X, User, LogOut, Settings, ChevronDown, Moon, Sun } from 'lucide-react';
 import XpressLogo from "../../assets/Xpress-Autozone-Logo.png";
 import { useAuth } from '../../Contexts/authContext';
 import { useNavigate} from 'react-router-dom';
@@ -7,9 +7,25 @@ import { useNavigate} from 'react-router-dom';
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' || 
+    (window.matchMedia('(prefers-color-scheme: dark)').matches && !localStorage.getItem('theme'));
+  });
   const { currentUser, logout } = useAuth();
   const userMenuRef = useRef(null);
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -63,22 +79,19 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Search Bar - Desktop */}
-          <div className="hidden md:flex flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-500" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search parts, services..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
-          </div>
+
 
           {/* User Profile - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 bg-yellow-300 bg-opacity-20 hover:bg-opacity-40 rounded-lg text-gray-800 transition-all duration-200"
+              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={toggleUserMenu}
@@ -166,7 +179,13 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
+            <button
+              onClick={toggleDarkMode}
+              className="text-gray-800 p-2 hover:bg-yellow-300 rounded-lg"
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
             <button
               onClick={toggleMobileMenu}
               className="text-gray-800 hover:text-gray-600 p-2"
@@ -179,19 +198,7 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div className="md:hidden bg-yellow-300 border-t border-yellow-500">
-            {/* Mobile Search */}
-            <div className="p-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-500" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search parts, services..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
-            </div>
+
 
             {/* Mobile User Profile */}
             <div className="border-t border-yellow-500 p-4">

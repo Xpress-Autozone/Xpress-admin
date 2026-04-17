@@ -16,6 +16,7 @@ import DeleteConfirmationModal from "../DeleteConfirmModal/DeleteConfirmationMod
 import useDeleteProduct from "../../../hooks/useDeleteProduct";
 import AlertModal from "../../AlertModal";
 import { CATEGORIES } from "../../../constants/categories";
+import { formatDisplayId } from "../../../utils/idGenerator";
 
 const uniqueStatuses = ["In Stock", "Low Stock", "Out of Stock"];
 
@@ -742,7 +743,7 @@ const ProductList = ({
                           {item.itemName || "--"}
                         </div>
                         <div className="text-[10px] text-gray-400 font-mono">
-                          {item.id || "--"}
+                          {formatDisplayId(item.id || item._id, 'product')}
                         </div>
                       </div>
                     </div>

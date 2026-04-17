@@ -14,6 +14,10 @@ export default {
         'xl': '1280px',
         '2xl': '1536px',
       },
+      fontFamily: {
+        sans: ['Outfit', 'sans-serif'],
+        outfit: ['Outfit', 'sans-serif'],
+      },
       spacing: {
         'safe-top': 'env(safe-area-inset-top)',
         'safe-bottom': 'env(safe-area-inset-bottom)',

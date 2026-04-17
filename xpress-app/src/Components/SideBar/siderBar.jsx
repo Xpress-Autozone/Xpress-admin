@@ -15,6 +15,9 @@ import {
   User,
   Shield,
   LayoutGrid,
+  ShoppingCart,
+  DollarSign,
+  Users,
   ChevronRight
 } from 'lucide-react';
 import { CATEGORIES } from '../../constants/categories';
@@ -23,29 +26,50 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const coreMenu = [
+  const insightsMenu = [
     {
       icon: LayoutDashboard,
       label: 'Overview',
       path: '/overview'
+    }
+  ];
+
+  const salesMenu = [
+    {
+      icon: ShoppingCart, // Added Import
+      label: 'Orders',
+      path: '/orders'
     },
+    {
+      icon: DollarSign, // Added Import
+      label: 'Accounting',
+      path: '/accounting'
+    }
+  ];
+
+  const inventoryMenu = [
     {
       icon: Package,
       label: 'Total Inventory',
       path: '/products'
+    }
+  ];
+
+  const managementMenu = [
+    {
+      icon: Shield,
+      label: 'System Admins',
+      path: '/admin-management'
+    },
+    {
+      icon: Users, // Added Import
+      label: 'Customers',
+      path: '/customers'
     },
     {
       icon: User,
       label: 'Vendors',
       path: '/vendors'
-    }
-  ];
-
-  const adminMenu = [
-    {
-      icon: Shield,
-      label: 'Admin Roles',
-      path: '/admin-roles'
     }
   ];
 
@@ -81,26 +105,48 @@ const Sidebar = () => {
 
   return (
     <div className="w-64 bg-white h-screen shadow-xl border-r border-gray-100 flex flex-col pt-24 sticky top-0 overflow-y-auto thin-scrollbar">
-      <nav className="flex-1 px-4 space-y-8">
-        {/* Group 1: Core */}
+      <nav className="flex-1 px-4 space-y-8 pb-10">
+        {/* Group 1: Insights */}
         <div>
-          <h3 className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-4">
-            Dashboard & Core
+          <h3 className="px-3 text-[10px] font-extrabold text-gray-400/80 uppercase tracking-[0.15em] mb-4">
+            Insights
           </h3>
           <ul className="space-y-1">
-            {coreMenu.map((item, index) => (
+            {insightsMenu.map((item, index) => (
               <NavItem key={index} item={item} />
             ))}
           </ul>
         </div>
 
-        {/* Group 2: Categories */}
+        {/* Group 2: Sales */}
+        <div>
+          <h3 className="px-3 text-[10px] font-extrabold text-gray-400/80 uppercase tracking-[0.15em] mb-4">
+            Sales & Logistics
+          </h3>
+          <ul className="space-y-1">
+            {salesMenu.map((item, index) => (
+              <NavItem key={index} item={item} />
+            ))}
+          </ul>
+        </div>
+
+        {/* Group 3: Inventory */}
         <div>
           <div className="flex items-center justify-between px-3 mb-4">
-            <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+            <h3 className="text-[10px] font-extrabold text-gray-400/80 uppercase tracking-[0.15em]">
+              Inventory
+            </h3>
+          </div>
+          <ul className="space-y-1">
+            {inventoryMenu.map((item, index) => (
+              <NavItem key={index} item={item} />
+            ))}
+          </ul>
+          
+          <div className="mt-6 mb-4 px-3 border-t border-gray-100 pt-4">
+             <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               Product Categories
             </h3>
-            <span className="bg-gray-100 text-gray-500 text-[10px] px-1.5 py-0.5 rounded font-bold">8</span>
           </div>
           <ul className="space-y-1">
             {CATEGORIES.map((cat) => (
@@ -117,13 +163,13 @@ const Sidebar = () => {
           </ul>
         </div>
 
-        {/* Group 3: Admin */}
+        {/* Group 4: Management */}
         <div>
-          <h3 className="px-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-4">
+          <h3 className="px-3 text-[10px] font-extrabold text-gray-400/80 uppercase tracking-[0.15em] mb-4">
             Management
           </h3>
           <ul className="space-y-1">
-            {adminMenu.map((item, index) => (
+            {managementMenu.map((item, index) => (
               <NavItem key={index} item={item} />
             ))}
           </ul>
