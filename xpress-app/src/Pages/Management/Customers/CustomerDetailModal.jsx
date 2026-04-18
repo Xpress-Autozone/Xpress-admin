@@ -28,10 +28,7 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
 
   if (!isOpen || !customer) return null;
 
-  const dummyOrders = [
-    { id: 'ORD-A9F3B1', date: '2026-04-10', total: 'GHC 180.00', status: 'Completed' },
-    { id: 'ORD-C7D1E9', date: '2026-03-22', total: 'GHC 320.00', status: 'Completed' }
-  ];
+  const orders = customer.orders || [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">

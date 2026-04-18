@@ -28,16 +28,7 @@ const Customers = () => {
             const data = await response.json();
             // Filter only customers
             const userList = (data.data || []).filter(u => u.role === 'customer' || !u.role);
-            
-            // Add some dummy metadata for high-fidelity feel
-            const enhancedList = userList.map(u => ({
-                ...u,
-                tags: u.tags || (Math.random() > 0.7 ? ['VIP'] : Math.random() > 0.6 ? ['Wholesale'] : []),
-                lastOrder: '2026-04-10',
-                orderCount: Math.floor(Math.random() * 10)
-            }));
-            
-            setCustomers(enhancedList);
+            setCustomers(userList);
         } catch (err) {
             console.error("Error fetching customers:", err);
         } finally {
@@ -45,13 +36,56 @@ const Customers = () => {
         }
     };
 
-    const handleUpdateTags = (uid, newTags) => {
-        setCustomers(prev => prev.map(c => c.uid === uid ? { ...c, tags: newTags } : c));
-        if (selectedCustomer?.uid === uid) {
-            setSelectedCustomer(prev => ({ ...prev, tags: newTags }));
+    const handleUpdateTags = async (uid, newTags) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/users/${uid}/tags`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+                body: JSON.stringify({ tags: newTags }),
+            });
+
+            if (response.ok) {
+                setCustomers(prev => prev.map(c => c.uid === uid ? { ...c, tags: newTags } : c));
+                if (selectedCustomer?.uid === uid) {
+                    setSelectedCustomer(prev => ({ ...prev, tags: newTags }));
+                }
+            } else {
+                const errorData = await response.json();
+                alert(errorData.message || "Failed to update tags");
+            }
+        } catch (err) {
+            console.error("Error updating tags:", err);
+            alert("Connection error while updating tags");
         }
-        // This acts as a mock until the actual backend endpoint is wired up
-        console.log(`System automatically saved tags for ${uid}:`, newTags);
+    };
+
+    const exportToCSV = () => {
+        const headers = ["UID", "Name", "Email", "Phone", "Orders", "Last Order", "Tags", "Joined"];
+        const rows = customers.map(c => [
+            c.uid,
+            c.displayName || "N/A",
+            c.email,
+            c.phoneNumber || "N/A",
+            c.orderCount || 0,
+            c.lastOrderDate || "N/A",
+            (c.tags || []).join(", "),
+            c.creationTime
+        ]);
+
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + headers.join(",") + "\n"
+            + rows.map(r => r.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `customers_export_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const getTagColor = (tag) => {
@@ -77,6 +111,12 @@ const Customers = () => {
                         <p className="text-gray-500 text-sm">Monitor your customer base, order history, and account tags.</p>
                     </div>
                     <div className="flex items-center gap-3">
+                        <button 
+                            onClick={exportToCSV}
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg text-sm font-bold hover:bg-gray-50 transition-colors"
+                        >
+                            Export CSV
+                        </button>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
@@ -134,17 +174,17 @@ const Customers = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="text-sm font-semibold text-gray-900">{customer.orderCount} Orders</div>
-                                            <div className="text-xs text-gray-400">Last: {customer.lastOrder}</div>
+                                            <div className="text-xs text-gray-400">Last: {customer.lastOrderDate || 'None'}</div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-wrap gap-1">
-                                                {customer.tags.map(tag => (
+                                                {(customer.tags || []).map(tag => (
                                                     <span key={tag} className={`text-[10px] font-bold px-2 py-0.5 rounded border ${getTagColor(tag)}`}>
                                                         {tag}
                                                     </span>
                                                 ))}
                                                 <button 
-                                                    onClick={(e) => e.stopPropagation()} 
+                                                    onClick={(e) => { e.stopPropagation(); /* tag modal toggle */ }} 
                                                     className="text-gray-400 hover:text-yellow-600"
                                                 >
                                                     <Tag className="w-3 h-3" />
