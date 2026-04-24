@@ -3,11 +3,8 @@ import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import XpressLogo from "../../../assets/Xpress-Autozone-Logo.png"
 import { useNavigate} from 'react-router-dom';
 import { useAuth } from '../../../Contexts/authContext';
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../../../authSlice';
-
-const db = getFirestore();
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);

@@ -11,13 +11,10 @@ import {
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../authSlice';
 
 const AuthContext = createContext();
-
-const db = getFirestore();
 
 export function useAuth() {
   const context = useContext(AuthContext);
