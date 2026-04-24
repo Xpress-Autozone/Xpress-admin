@@ -98,11 +98,16 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
                 <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Profile Tags</h3>
                 <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
                   <div className="flex flex-wrap gap-2 mb-3">
+                    {tags.length === 0 && <p className="text-[10px] text-gray-400 italic">No tags assigned</p>}
                     {tags.map((tag, index) => (
                       <span key={index} className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold border border-yellow-200">
                         {tag}
                         <button 
-                          onClick={(e) => { e.preventDefault(); removeTag(tag); }} 
+                          onClick={(e) => { 
+                            e.preventDefault(); 
+                            const newTags = tags.filter(t => t !== tag);
+                            setTags(newTags);
+                          }} 
                           className="hover:text-yellow-900 focus:outline-none"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -112,11 +117,20 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
                   </div>
                   <input
                     type="text"
-                    onKeyDown={handleAddTag}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                        e.preventDefault();
+                        const newTag = e.target.value.trim();
+                        if (!tags.includes(newTag)) {
+                          setTags([...tags, newTag]);
+                        }
+                        e.target.value = '';
+                      }
+                    }}
                     placeholder="Add a tag..."
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
                   />
-                  <p className="text-[10px] text-gray-500 mt-2">Press 'Enter' to add.</p>
+                  <p className="text-[10px] text-gray-500 mt-2 font-medium">Tip: Press 'Enter' to add to list, then click 'Save Profile Tags'.</p>
                 </div>
               </div>
             </div>
@@ -160,8 +174,14 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
                 <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Quick Actions</h3>
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2">
                    <button 
-                     onClick={() => onUpdateTags && onUpdateTags(customer.uid, tags)}
-                     className="text-xs font-bold text-gray-700 hover:text-black flex items-center gap-2 p-2 hover:bg-white rounded transition-all"
+                     onClick={async () => {
+                        const btn = document.getElementById('save-tags-btn');
+                        if (btn) btn.disabled = true;
+                        await onUpdateTags(customer.uid, tags);
+                        if (btn) btn.disabled = false;
+                     }}
+                     id="save-tags-btn"
+                     className="text-xs font-bold text-gray-700 hover:text-black flex items-center gap-2 p-2 hover:bg-white rounded transition-all disabled:opacity-50"
                    >
                      <Save className="w-4 h-4 text-green-500" /> Save Profile Tags
                    </button>

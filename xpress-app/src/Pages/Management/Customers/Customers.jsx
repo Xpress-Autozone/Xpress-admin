@@ -52,6 +52,7 @@ const Customers = () => {
                 if (selectedCustomer?.uid === uid) {
                     setSelectedCustomer(prev => ({ ...prev, tags: newTags }));
                 }
+                alert("✓ Tags updated successfully!");
             } else {
                 const errorData = await response.json();
                 alert(errorData.message || "Failed to update tags");
