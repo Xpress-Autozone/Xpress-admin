@@ -5,12 +5,15 @@ import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../Components/LoadingSpinner";
 import { API_BASE_URL } from "../../config/api";
 import { formatDisplayId } from "../../utils/idGenerator";
+import AdminHistoryModal from "./AdminHistoryModal";
 
 const SystemAdmins = () => {
     const navigate = useNavigate();
     const { token } = useSelector((state) => state.auth);
     const [admins, setAdmins] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedAdmin, setSelectedAdmin] = useState(null);
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
     useEffect(() => {
         fetchAdmins();
@@ -32,6 +35,11 @@ const SystemAdmins = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleViewHistory = (admin) => {
+        setSelectedAdmin(admin);
+        setIsHistoryModalOpen(true);
     };
 
     const getRoleBadge = (role) => {
@@ -90,13 +98,24 @@ const SystemAdmins = () => {
                                 </div>
                                 <div className="pt-4 border-t border-gray-50 flex items-center justify-between text-[11px] font-bold text-gray-400">
                                     <span>Last Active: Today</span>
-                                    <button className="text-yellow-600 hover:underline">View History</button>
+                                    <button 
+                                        onClick={() => handleViewHistory(admin)}
+                                        className="text-yellow-600 hover:underline"
+                                    >
+                                        View History
+                                    </button>
                                 </div>
                             </div>
                         ))
                     )}
                 </div>
             </div>
+
+            <AdminHistoryModal 
+                isOpen={isHistoryModalOpen} 
+                admin={selectedAdmin} 
+                onClose={() => setIsHistoryModalOpen(false)} 
+            />
         </div>
     );
 };
