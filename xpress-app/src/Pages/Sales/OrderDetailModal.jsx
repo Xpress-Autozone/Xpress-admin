@@ -1,18 +1,31 @@
 import React from 'react';
-import { X, Package, User, MapPin, Truck, CheckCircle, Clock, MessageSquare } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CheckCircle, Clock, MessageSquare, CreditCard } from 'lucide-react';
 
 const OrderDetailModal = ({ order, isOpen, onClose }) => {
   if (!isOpen || !order) return null;
 
-  // Derive some extended dummy details based on the order
-  const mockItems = [
-    { name: order.items.split('(')[0].trim() || 'Auto Part', qty: order.items.match(/\((\w+)\)/)?.[1] || 'x1', price: order.total }
-  ];
+  // Use real items from the order, or fall back to a parsed summary
+  const orderItems = order.rawItems?.length > 0
+    ? order.rawItems.map(item => ({
+        name: item.name || item.itemName || 'Auto Part',
+        qty: item.quantity || 1,
+        price: `GHC ${(Number(item.price) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        unitPrice: `GHC ${Number(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+      }))
+    : [{ name: order.items || 'Order Item', qty: 1, price: order.total, unitPrice: order.total }];
 
   const handleWhatsApp = () => {
     if (!order.whatsapp) return;
     const message = `Hello, this is Xpress Autozone regarding your order ${order.id}. We are ready to arrange your delivery!`;
     window.open(`https://wa.me/${order.whatsapp.replace('+', '')}?text=${encodeURIComponent(message)}`, '_blank');
+  };
+
+  const getStatusStyle = (status) => {
+    const s = status?.toLowerCase();
+    if (s === 'delivered' || s === 'completed') return 'border-green-200 bg-green-50 text-green-700';
+    if (s === 'shipped' || s === 'out for delivery') return 'border-orange-200 bg-orange-50 text-orange-700';
+    if (s === 'cancelled') return 'border-red-200 bg-red-50 text-red-700';
+    return 'border-yellow-200 bg-yellow-50 text-yellow-700';
   };
 
   return (
@@ -43,25 +56,31 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
             <div className="space-y-6">
               
               {/* Status Banner */}
-              <div className="p-4 rounded-xl border border-yellow-200 bg-yellow-50 flex items-center justify-between">
+              <div className={`p-4 rounded-xl border flex items-center justify-between ${getStatusStyle(order.status)}`}>
                  <div className="flex items-center gap-3">
-                   <div className="p-2 bg-yellow-100 text-yellow-700 rounded-full">
+                   <div className="p-2 rounded-full bg-white/50">
                      <Clock className="w-5 h-5" />
                    </div>
                    <div>
-                     <p className="text-xs font-bold text-yellow-700 uppercase">Current Status</p>
+                     <p className="text-xs font-bold uppercase">Order Status</p>
                      <p className="text-sm font-bold text-gray-900">{order.status}</p>
                    </div>
                  </div>
+                 {order.paymentStatus && (
+                   <div className="flex items-center gap-1.5">
+                     <CreditCard className="w-3.5 h-3.5" />
+                     <span className="text-[10px] font-bold uppercase">{order.paymentStatus}</span>
+                   </div>
+                 )}
               </div>
 
               {/* Items List */}
               <div className="border border-gray-100 rounded-xl overflow-hidden">
                 <div className="bg-gray-50 px-4 py-2 border-b border-gray-100">
-                   <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Order Items</h3>
+                   <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Order Items ({orderItems.length})</h3>
                 </div>
                 <div className="divide-y divide-gray-50">
-                   {mockItems.map((item, idx) => (
+                   {orderItems.map((item, idx) => (
                      <div key={idx} className="p-4 flex justify-between items-center bg-white">
                         <div className="flex items-center gap-3">
                            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
@@ -69,7 +88,7 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
                            </div>
                            <div>
                              <p className="text-sm font-bold text-gray-900">{item.name}</p>
-                             <p className="text-xs text-gray-500">Qty: {item.qty}</p>
+                             <p className="text-xs text-gray-500">Qty: {item.qty} × {item.unitPrice}</p>
                            </div>
                         </div>
                         <span className="text-sm font-bold text-gray-900">{item.price}</span>
@@ -81,6 +100,15 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
                    <span className="text-lg font-bold text-gray-900">{order.total}</span>
                 </div>
               </div>
+
+              {/* Payment Method */}
+              {order.paymentMethod && (
+                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-gray-400" />
+                  <span className="text-xs font-bold text-gray-500 uppercase">Payment Method:</span>
+                  <span className="text-xs font-bold text-gray-900">{order.paymentMethod}</span>
+                </div>
+              )}
             </div>
 
             {/* Right Col - Customer & Logistics */}
@@ -93,15 +121,17 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
                   <div className="p-4 rounded-xl border border-gray-100 bg-white flex items-center justify-between">
                      <div>
                         <p className="text-sm font-bold text-gray-900">{order.customer}</p>
-                        <p className="text-xs text-gray-500">{order.whatsapp}</p>
+                        <p className="text-xs text-gray-500">{order.whatsapp || 'No phone'}</p>
                      </div>
-                     <button
-                        onClick={handleWhatsApp}
-                        className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
-                     >
-                        <MessageSquare className="w-4 h-4" />
-                        <span className="text-xs font-bold">Chat</span>
-                     </button>
+                     {order.whatsapp && (
+                       <button
+                          onClick={handleWhatsApp}
+                          className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
+                       >
+                          <MessageSquare className="w-4 h-4" />
+                          <span className="text-xs font-bold">Chat</span>
+                       </button>
+                     )}
                   </div>
                </div>
 
@@ -111,9 +141,7 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
                   </h3>
                   <div className="p-4 rounded-xl border border-gray-100 bg-white">
                      <p className="text-sm text-gray-700 leading-relaxed">
-                       123 Autozone Ave,<br/>
-                       Accra, Ghana<br/>
-                       (Pending confirmation)
+                       {order.address || 'Address pending confirmation'}
                      </p>
                   </div>
                </div>
