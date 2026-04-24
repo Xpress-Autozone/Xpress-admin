@@ -22,7 +22,7 @@ const Orders = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/orders?page=${pagination.page}&limit=20`, {
+      const response = await fetch(`${API_BASE_URL}/getOrders?page=${pagination.page}&limit=20`, {
         headers: {
           ...(token && { Authorization: `Bearer ${token}` }),
         },
