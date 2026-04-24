@@ -47,10 +47,13 @@ const Overview = () => {
   };
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    if (token) {
+      fetchDashboardData();
+    }
+  }, [token]);
 
   const fetchDashboardData = async () => {
+    if (!token) return;
     setLoading(true);
     setError(null);
     try {

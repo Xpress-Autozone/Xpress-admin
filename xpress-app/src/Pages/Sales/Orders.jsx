@@ -16,10 +16,13 @@ const Orders = () => {
   const [pagination, setPagination] = useState({ page: 1, hasMore: false, total: 0 });
 
   useEffect(() => {
-    fetchOrders();
-  }, [pagination.page]);
+    if (token) {
+      fetchOrders();
+    }
+  }, [pagination.page, token]);
 
   const fetchOrders = async () => {
+    if (!token) return;
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/getOrders?page=${pagination.page}&limit=20`, {

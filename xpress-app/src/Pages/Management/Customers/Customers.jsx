@@ -16,10 +16,13 @@ const Customers = () => {
     const [isUpdating, setIsUpdating] = useState(false);
 
     useEffect(() => {
-        fetchCustomers();
-    }, []);
+        if (token) {
+            fetchCustomers();
+        }
+    }, [token]);
 
     const fetchCustomers = async () => {
+        if (!token) return;
         try {
             const response = await fetch(`${API_BASE_URL}/users`, {
                 headers: {

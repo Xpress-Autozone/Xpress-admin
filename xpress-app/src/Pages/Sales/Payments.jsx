@@ -25,10 +25,13 @@ const Payments = () => {
     });
 
     useEffect(() => {
-        fetchAccountingData();
-    }, []);
+        if (token) {
+            fetchAccountingData();
+        }
+    }, [token]);
 
     const fetchAccountingData = async () => {
+        if (!token) return;
         try {
             const response = await fetch(`${API_BASE_URL}/transactions`, {
                 headers: {
