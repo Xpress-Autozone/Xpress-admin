@@ -11,19 +11,23 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
     }
   }, [customer]);
 
-  const handleAddTag = (e) => {
+  const handleAddTag = async (e) => {
     if (e.key === 'Enter' && e.target.value.trim() !== '') {
       e.preventDefault();
       const newTag = e.target.value.trim();
       if (!tags.includes(newTag)) {
-        setTags(prev => [...prev, newTag]);
+        const newTags = [...tags, newTag];
+        setTags(newTags);
+        if (onUpdateTags) await onUpdateTags(customer.uid, newTags);
       }
       e.target.value = '';
     }
   };
 
-  const removeTag = (tagToRemove) => {
-    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  const removeTag = async (tagToRemove) => {
+    const newTags = tags.filter(tag => tag !== tagToRemove);
+    setTags(newTags);
+    if (onUpdateTags) await onUpdateTags(customer.uid, newTags);
   };
 
   if (!isOpen || !customer) return null;
@@ -103,11 +107,7 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
                       <span key={index} className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold border border-yellow-200">
                         {tag}
                         <button 
-                          onClick={(e) => { 
-                            e.preventDefault(); 
-                            const newTags = tags.filter(t => t !== tag);
-                            setTags(newTags);
-                          }} 
+                          onClick={(e) => { e.preventDefault(); removeTag(tag); }} 
                           className="hover:text-yellow-900 focus:outline-none"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -117,20 +117,11 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
                   </div>
                   <input
                     type="text"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && e.target.value.trim() !== '') {
-                        e.preventDefault();
-                        const newTag = e.target.value.trim();
-                        if (!tags.includes(newTag)) {
-                          setTags([...tags, newTag]);
-                        }
-                        e.target.value = '';
-                      }
-                    }}
+                    onKeyDown={handleAddTag}
                     placeholder="Add a tag..."
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
                   />
-                  <p className="text-[10px] text-gray-500 mt-2 font-medium">Tip: Press 'Enter' to add to list, then click 'Save Profile Tags'.</p>
+                  <p className="text-[10px] text-gray-500 mt-2 font-medium italic">Tags auto-save on 'Enter'.</p>
                 </div>
               </div>
             </div>
@@ -173,17 +164,8 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
               <div className="mt-8">
                 <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider">Quick Actions</h3>
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex flex-col gap-2">
-                   <button 
-                     onClick={async () => {
-                        const btn = document.getElementById('save-tags-btn');
-                        if (btn) btn.disabled = true;
-                        await onUpdateTags(customer.uid, tags);
-                        if (btn) btn.disabled = false;
-                     }}
-                     id="save-tags-btn"
-                     className="text-xs font-bold text-gray-700 hover:text-black flex items-center gap-2 p-2 hover:bg-white rounded transition-all disabled:opacity-50"
-                   >
-                     <Save className="w-4 h-4 text-green-500" /> Save Profile Tags
+                   <button className="text-xs font-bold text-gray-700 hover:text-black flex items-center gap-2 p-2 hover:bg-white rounded transition-all">
+                     <ShieldAlert className="w-4 h-4 text-red-500" /> Reset Password
                    </button>
                    <button className="text-xs font-bold text-gray-700 hover:text-black flex items-center gap-2 p-2 hover:bg-white rounded transition-all">
                      <ShieldAlert className="w-4 h-4 text-red-500" /> Reset Password
