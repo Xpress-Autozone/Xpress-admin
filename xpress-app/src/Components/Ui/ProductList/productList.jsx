@@ -284,29 +284,53 @@ const ProductList = ({
     setIsDeleteModalOpen(true);
   };
 
+  const handleBulkDeleteClick = () => {
+    setItemToDelete({ isBulk: true, count: selectedItems.length });
+    setIsDeleteModalOpen(true);
+  };
+
   const handleConfirmDelete = async () => {
     try {
-      const productId = itemToDelete._id || itemToDelete.id;
-      console.log('[ProductList] Deleting product:', productId);
-      await deleteProduct(productId, false);
+      if (itemToDelete?.isBulk) {
+        console.log('[ProductList] Bulk deleting products:', selectedItems);
+        // Bulk delete promises
+        const deletePromises = selectedItems.map(id => deleteProduct(id, false));
+        await Promise.all(deletePromises);
+        
+        setAlert({
+          isOpen: true,
+          type: "success",
+          title: "Success",
+          message: `${selectedItems.length} products deleted successfully`
+        });
+        
+        // Notify parent to refresh
+        onDeleteItem?.();
+        setSelectedItems([]);
+      } else {
+        const productId = itemToDelete._id || itemToDelete.id;
+        console.log('[ProductList] Deleting product:', productId);
+        await deleteProduct(productId, false);
 
-      setAlert({
-        isOpen: true,
-        type: "success",
-        title: "Success",
-        message: "Product deleted successfully"
-      });
+        setAlert({
+          isOpen: true,
+          type: "success",
+          title: "Success",
+          message: "Product deleted successfully"
+        });
 
-      onDeleteItem?.(itemToDelete);
+        onDeleteItem?.(itemToDelete);
+      }
+      
       setIsDeleteModalOpen(false);
       setItemToDelete(null);
     } catch (error) {
-      console.error('[ProductList] Error deleting product:', error);
+      console.error('[ProductList] Error deleting product(s):', error);
       setAlert({
         isOpen: true,
         type: "error",
         title: "Error",
-        message: error.message
+        message: error.message || "Failed to delete items"
       });
     }
   };
@@ -427,6 +451,19 @@ const ProductList = ({
                       <span>Clear All</span>
                     </button>
                   )}
+
+                {selectedItems.length > 0 && (
+                  <div className="flex items-center space-x-2 border-l border-gray-300 pl-4 ml-4">
+                    <span className="text-sm font-semibold text-gray-700">{selectedItems.length} selected</span>
+                    <button
+                      onClick={handleBulkDeleteClick}
+                      className="flex items-center space-x-1 px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors text-sm font-medium border border-red-200"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Bulk Delete</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-gray-600">
@@ -457,14 +494,6 @@ const ProductList = ({
                     }
                   </strong>
                 </span>
-                {selectedItems.length > 0 && (
-                  <span>
-                    Selected:{" "}
-                    <strong className="text-blue-600">
-                      {selectedItems.length}
-                    </strong>
-                  </span>
-                )}
               </div>
             </div>
 

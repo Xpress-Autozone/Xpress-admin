@@ -70,7 +70,8 @@ export const ROLE_CONFIG = {
     icon: '🟠',
     level: 25,
     permissions: [
-      'view_dashboard',
+      'manage_products',
+      'manage_orders',
     ],
   },
   customer: {

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import SideBar from '../Components/SideBar/siderBar';
 import Navbar from '../Components/NavBar/navBar';
 import ProtectedRoute from '../Components/ProtectedRoute/protectedRoute';
+import { useSelector } from 'react-redux';
 
 // Import all your page components
 import Overview from '../Pages/Dashboard/OverView/Overview';
@@ -27,6 +28,9 @@ function DashboardLayout() {
   // Update browser icon based on notification status
   useFavicon(hasNewInquiries);
 
+  const { user } = useSelector((state) => state.auth);
+  const isVendor = user?.role === 'vendor';
+
   return (
     <ProtectedRoute>
       <div className="">
@@ -40,8 +44,8 @@ function DashboardLayout() {
           {/* Main content area */}
           <main className='flex-1 bg-gray-100 overflow-y-auto h-screen'>
             <Routes>
-              {/* Default redirect to overview */}
-              <Route path="/" element={<Navigate to="/overview" replace />} />
+              {/* Default redirect based on role */}
+              <Route path="/" element={<Navigate to={isVendor ? "/products" : "/overview"} replace />} />
 
               {/* All your routes */}
               <Route path="/overview" element={<Overview />} />

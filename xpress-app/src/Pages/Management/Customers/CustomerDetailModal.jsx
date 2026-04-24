@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, User, MapPin, Mail, Phone, Calendar, ShoppingBag, Edit, ShieldAlert, MessageSquare, Save, Car } from 'lucide-react';
 import { formatDisplayId } from '../../../utils/idGenerator';
 
-const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
+const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdating }) => {
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
@@ -118,10 +118,16 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags }) => {
                   <input
                     type="text"
                     onKeyDown={handleAddTag}
-                    placeholder="Add a tag..."
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
+                    disabled={isUpdating}
+                    placeholder={isUpdating ? "Saving..." : "Add a tag..."}
+                    className={`w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm ${isUpdating ? 'bg-gray-50 opacity-70' : ''}`}
                   />
-                  <p className="text-[10px] text-gray-500 mt-2 font-medium italic">Tags auto-save on 'Enter'.</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-[10px] text-gray-500 font-medium italic">Tags auto-save on 'Enter'.</p>
+                    {isUpdating && (
+                      <span className="text-[10px] text-yellow-600 font-bold animate-pulse">Saving...</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

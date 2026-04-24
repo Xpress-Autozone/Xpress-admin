@@ -6,7 +6,7 @@ import LoadingSpinner from '../../Components/LoadingSpinner';
 import OrderDetailModal from './OrderDetailModal';
 
 const Orders = () => {
-  const { token } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,21 +29,32 @@ const Orders = () => {
       });
       const result = await response.json();
       if (result.success) {
-        const mapped = (result.data || []).map(order => ({
-          id: order.orderNumber || order.id,
-          docId: order.id,
-          customer: order.customerName || order.customer?.name || 'Unknown',
-          items: order.items?.map(i => `${i.name || i.itemName} (x${i.quantity || 1})`).join(', ') || 'N/A',
-          total: `GHC ${(Number(order.total) || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-          totalRaw: Number(order.total) || 0,
-          status: order.orderStatus || order.status || 'pending',
-          paymentStatus: order.paymentStatus || 'pending',
-          paymentMethod: order.paymentMethod || 'N/A',
-          date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
-          whatsapp: order.customerPhone || order.customer?.phone || '',
-          address: order.deliveryAddress || order.address || '',
-          rawItems: order.items || [],
-        }));
+        const mapped = (result.data || []).map(order => {
+          // VENDOR SCOPING: Only show items belonging to this vendor
+          const itemsToDisplay = user?.role === 'vendor' 
+            ? (order.items || []).filter(item => item.vendorId === user.uid)
+            : (order.items || []);
+
+          const totalDisplay = user?.role === 'vendor'
+            ? itemsToDisplay.reduce((sum, item) => sum + (Number(item.price) * (item.quantity || 1)), 0)
+            : (Number(order.total) || 0);
+
+          return {
+            id: order.orderNumber || order.id,
+            docId: order.id,
+            customer: order.customerName || order.customer?.name || 'Unknown',
+            items: itemsToDisplay.map(i => `${i.name || i.itemName} (x${i.quantity || 1})`).join(', ') || 'N/A',
+            total: `GHC ${totalDisplay.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+            totalRaw: totalDisplay,
+            status: order.orderStatus || order.status || 'pending',
+            paymentStatus: order.paymentStatus || 'pending',
+            paymentMethod: order.paymentMethod || 'N/A',
+            date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
+            whatsapp: order.customerPhone || order.customer?.phone || '',
+            address: order.deliveryAddress || order.address || '',
+            rawItems: itemsToDisplay,
+          };
+        });
         setOrders(mapped);
         setPagination(prev => ({
           ...prev,
@@ -251,6 +262,7 @@ const Orders = () => {
           order={selectedOrder} 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
+          onUpdate={fetchOrders}
       />
     </div>
   );

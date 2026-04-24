@@ -22,6 +22,7 @@ const Overview = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('analytics');
+  const [adminLogs, setAdminLogs] = useState([]);
 
   const lowStockProducts = products.filter(p => {
     const stock = p.stock || p.quantity || 0;
@@ -77,6 +78,19 @@ const Overview = () => {
           setAnalyticsData(result.data.analytics);
       } else {
           setError(result.message || "Failed to load statistics");
+      }
+
+      // Fetch admin logs
+      const logsResponse = await fetch(`${API_BASE_URL}/admin-logs`, {
+        headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+      if (logsResponse.ok) {
+          const logsResult = await logsResponse.json();
+          if (logsResult.success) {
+              setAdminLogs(logsResult.data);
+          }
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -462,25 +476,29 @@ const Overview = () => {
            </div>
           
           <div className="bg-white rounded-3xl border border-gray-50 overflow-hidden shadow-sm">
-            {[
-              { title: 'Administrator authenticated successfully (Session: 197.2x)', meta: '2 mins ago', type: 'success' },
-              { title: 'Inventory batch update completed via REST API', meta: '1 hour ago', type: 'info' },
-              { title: 'Critical stock alert webhook sent to Vendor "Autozone"', meta: '4 hours ago', type: 'warning' },
-              { title: 'Automatic Server Database snapshot initiated', meta: 'Yesterday', type: 'info' },
-              { title: 'System-wide catalog cache rebuild executed successfully', meta: 'Yesterday', type: 'success' }
-            ].map((note, i) => (
+            {adminLogs.length > 0 ? adminLogs.slice(0, 10).map((log, i) => (
               <div key={i} className="flex items-center justify-between p-5 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className={`w-3 h-3 rounded-full shadow-sm ${
-                    note.type === 'success' ? 'bg-green-400 border-2 border-green-100' : 
-                    note.type === 'warning' ? 'bg-orange-500 border-2 border-orange-100' : 
-                    'bg-blue-400 border-2 border-blue-100'
+                    log.action.includes('Delete') || log.action.includes('Fail') ? 'bg-red-500 border-2 border-red-100' : 
+                    log.action.includes('Update') || log.action.includes('Edit') ? 'bg-blue-400 border-2 border-blue-100' : 
+                    'bg-green-400 border-2 border-green-100'
                   }`}></div>
-                  <p className="text-sm font-bold text-gray-700 text-left">{note.title}</p>
+                  <div className="text-left">
+                    <p className="text-sm font-bold text-gray-700">{log.action}</p>
+                    <p className="text-xs text-gray-500">{log.details}</p>
+                  </div>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter whitespace-nowrap">{note.meta}</span>
+                <div className="text-right">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter whitespace-nowrap block">
+                    {new Date(log.timestamp).toLocaleDateString()}
+                  </span>
+                  <span className="text-[10px] text-gray-400">by {log.adminEmail}</span>
+                </div>
               </div>
-            ))}
+            )) : (
+              <div className="p-8 text-center text-gray-500 text-sm font-medium">No recent logs found.</div>
+            )}
           </div>
         </div>
       </div>

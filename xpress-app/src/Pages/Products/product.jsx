@@ -24,7 +24,7 @@ const AddProduct = () => {
     brand: "",
     partNumber: "",
     specifications: [{ label: "", value: "" }],
-    compatibility: [""],
+    compatibility: [{ make: "", model: "", yearStart: "", yearEnd: "" }],
     tags: [],
     featured: false,
     newProduct: false,
@@ -33,7 +33,12 @@ const AddProduct = () => {
   });
   const { user, token } = useSelector((state) => state.auth);
 
-  const [images, setImages] = useState([]);
+  // VENDOR SCOPING: Pre-fill vendorId if user is a vendor
+  useState(() => {
+    if (user?.role === 'vendor' && user?.uid) {
+      setFormData(prev => ({ ...prev, vendorId: user.uid }));
+    }
+  }, [user]);
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({
     isOpen: false,
@@ -138,16 +143,11 @@ const AddProduct = () => {
   };
 
   // Vehicle compatibility handlers
-  const handleCompatChange = (index, value) => {
-    const updated = [...formData.compatibility];
-    updated[index] = value;
-    setFormData((prev) => ({ ...prev, compatibility: updated }));
-  };
 
   const addCompat = () => {
     setFormData((prev) => ({
       ...prev,
-      compatibility: [...prev.compatibility, ""],
+      compatibility: [...prev.compatibility, { make: "", model: "", yearStart: "", yearEnd: "" }],
     }));
   };
 
@@ -156,6 +156,14 @@ const AddProduct = () => {
       ...prev,
       compatibility: prev.compatibility.filter((_, i) => i !== index),
     }));
+  };
+
+  const handleCompatChange = (index, field, value) => {
+    setFormData((prev) => {
+      const newCompat = [...prev.compatibility];
+      newCompat[index][field] = value;
+      return { ...prev, compatibility: newCompat };
+    });
   };
 
   const handleSubmit = async () => {
@@ -183,7 +191,7 @@ const AddProduct = () => {
     data.append("brand", formData.brand);
     data.append("partNumber", formData.partNumber);
     data.append("specifications", JSON.stringify(formData.specifications.filter(s => s.label && s.value)));
-    data.append("compatibility", JSON.stringify(formData.compatibility.filter(c => c)));
+    data.append("compatibility", JSON.stringify(formData.compatibility.filter(c => c.make && c.model)));
     data.append("tags", JSON.stringify(formData.tags));
     data.append("featured", formData.featured);
     data.append("newProduct", formData.newProduct);
@@ -272,14 +280,19 @@ const AddProduct = () => {
                       name="vendorId"
                       value={formData.vendorId}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
+                      disabled={user?.role === 'vendor'}
+                      className={`w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors ${user?.role === 'vendor' ? 'bg-gray-100 cursor-not-allowed opacity-75' : ''}`}
                     >
                       <option value="">Select Vendor</option>
-                      {vendors.map(vendor => (
-                        <option key={vendor.uid || vendor.id} value={vendor.uid || vendor.id}>
-                          {vendor.displayName || vendor.userName || vendor.email}
-                        </option>
-                      ))}
+                      {user?.role === 'vendor' ? (
+                        <option value={user.uid}>{user.displayName || user.email} (You)</option>
+                      ) : (
+                        vendors.map(vendor => (
+                          <option key={vendor.uid || vendor.id} value={vendor.uid || vendor.id}>
+                            {vendor.displayName || vendor.userName || vendor.email}
+                          </option>
+                        ))
+                      )}
                     </select>
                     {vendorsLoading && <p className="text-xs text-gray-400 mt-1">Loading vendors...</p>}
                   </div>
@@ -444,19 +457,52 @@ const AddProduct = () => {
                     <Plus className="w-4 h-4" /> Add Vehicle
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
                   {Array.isArray(formData.compatibility) && formData.compatibility.map((item, index) => (
-                    <div key={index} className="flex gap-2 items-center">
-                      <input
-                        type="text"
-                        value={item}
-                        onChange={(e) => handleCompatChange(index, e.target.value)}
-                        placeholder="e.g. Toyota Camry 2019-2022"
-                        className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none"
-                      />
+                    <div key={index} className="flex flex-wrap md:flex-nowrap gap-3 items-end p-3 border border-gray-100 rounded-lg bg-gray-50">
+                      <div className="flex-1 min-w-[120px]">
+                         <label className="block text-xs font-medium text-gray-500 mb-1">Make</label>
+                         <input
+                           type="text"
+                           value={item.make}
+                           onChange={(e) => handleCompatChange(index, 'make', e.target.value)}
+                           placeholder="e.g. Toyota"
+                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
+                         />
+                      </div>
+                      <div className="flex-1 min-w-[120px]">
+                         <label className="block text-xs font-medium text-gray-500 mb-1">Model</label>
+                         <input
+                           type="text"
+                           value={item.model}
+                           onChange={(e) => handleCompatChange(index, 'model', e.target.value)}
+                           placeholder="e.g. Camry"
+                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
+                         />
+                      </div>
+                      <div className="w-24">
+                         <label className="block text-xs font-medium text-gray-500 mb-1">Year Start</label>
+                         <input
+                           type="number"
+                           value={item.yearStart}
+                           onChange={(e) => handleCompatChange(index, 'yearStart', e.target.value)}
+                           placeholder="2018"
+                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
+                         />
+                      </div>
+                      <div className="w-24">
+                         <label className="block text-xs font-medium text-gray-500 mb-1">Year End</label>
+                         <input
+                           type="number"
+                           value={item.yearEnd}
+                           onChange={(e) => handleCompatChange(index, 'yearEnd', e.target.value)}
+                           placeholder="2022"
+                           className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none text-sm"
+                         />
+                      </div>
                       <button
                         onClick={() => removeCompat(index)}
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
                       >
                         <X className="w-5 h-5" />
                       </button>

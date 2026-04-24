@@ -13,6 +13,7 @@ const Customers = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
 
     useEffect(() => {
         fetchCustomers();
@@ -37,6 +38,7 @@ const Customers = () => {
     };
 
     const handleUpdateTags = async (uid, newTags) => {
+        setIsUpdating(true);
         try {
             const response = await fetch(`${API_BASE_URL}/users/${uid}/tags`, {
                 method: 'PATCH',
@@ -52,14 +54,15 @@ const Customers = () => {
                 if (selectedCustomer?.uid === uid) {
                     setSelectedCustomer(prev => ({ ...prev, tags: newTags }));
                 }
-                alert("✓ Tags updated successfully!");
+                // No alert - silent auto-save
             } else {
                 const errorData = await response.json();
-                alert(errorData.message || "Failed to update tags");
+                console.error("Failed to update tags:", errorData.message);
             }
         } catch (err) {
             console.error("Error updating tags:", err);
-            alert("Connection error while updating tags");
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -213,6 +216,7 @@ const Customers = () => {
                 isOpen={isModalOpen} 
                 onClose={() => setIsModalOpen(false)} 
                 onUpdateTags={handleUpdateTags}
+                isUpdating={isUpdating}
             />
         </div>
     );

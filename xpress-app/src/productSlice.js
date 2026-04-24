@@ -4,10 +4,16 @@ import { API_BASE_URL } from "./config/api";
 // Async thunks for API calls
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
+      const { token } = getState().auth;
       const response = await fetch(
-        `${API_BASE_URL}/products?limit=1000`
+        `${API_BASE_URL}/products?limit=1000`,
+        {
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        }
       );
       const data = await response.json();
       if (!response.ok)

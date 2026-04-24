@@ -1,7 +1,13 @@
 import React from 'react';
-import { X, Package, User, MapPin, Truck, CheckCircle, Clock, MessageSquare, CreditCard } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CheckCircle, Clock, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { API_BASE_URL } from '../../config/api';
 
-const OrderDetailModal = ({ order, isOpen, onClose }) => {
+const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
+  const { token } = useSelector((state) => state.auth);
+  const [isUpdating, setIsUpdating] = useState(false);
+  
   if (!isOpen || !order) return null;
 
   // Use real items from the order, or fall back to a parsed summary
@@ -26,6 +32,33 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
     if (s === 'shipped' || s === 'out for delivery') return 'border-orange-200 bg-orange-50 text-orange-700';
     if (s === 'cancelled') return 'border-red-200 bg-red-50 text-red-700';
     return 'border-yellow-200 bg-yellow-50 text-yellow-700';
+  };
+
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      setIsUpdating(true);
+      const response = await fetch(`${API_BASE_URL}/updateOrderStatus/${order.docId || order.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ orderStatus: newStatus })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        onUpdate?.();
+        onClose();
+      } else {
+        alert(result.message || "Failed to update order status");
+      }
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      alert("An error occurred while updating order status.");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -166,16 +199,27 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between gap-3">
-            <button className="px-5 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent">
+            <button 
+              onClick={() => handleUpdateStatus('cancelled')}
+              disabled={isUpdating}
+              className="px-5 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent disabled:opacity-50"
+            >
               Cancel Order
             </button>
             <div className="flex gap-3">
-              <button onClick={onClose} className="px-5 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors">
+              <button onClick={onClose} disabled={isUpdating} className="px-5 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50">
                 Close
               </button>
-              <button className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" /> Mark as Processed
-              </button>
+              {order.status !== 'completed' && order.status !== 'cancelled' && (
+                <button 
+                  onClick={() => handleUpdateStatus(order.status === 'pending' ? 'confirmed' : order.status === 'confirmed' ? 'shipped' : 'delivered')}
+                  disabled={isUpdating}
+                  className="px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-bold rounded-lg shadow-sm transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} 
+                  {order.status === 'pending' ? 'Confirm Order' : order.status === 'confirmed' ? 'Mark as Shipped' : 'Mark as Delivered'}
+                </button>
+              )}
             </div>
         </div>
       </div>
