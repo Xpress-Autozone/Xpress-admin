@@ -1,7 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
-
-@layer base {
+ 
+@theme {
+  --animate-spin: spin 0.6s linear infinite;
+}
+ @layer base {
   :root {
     --font-outfit: 'Outfit', sans-serif;
   }
