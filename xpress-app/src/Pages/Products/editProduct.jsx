@@ -76,7 +76,13 @@ const EditProduct = () => {
                         brand: product.brand || "",
                         partNumber: product.partNumber || "",
                         specifications: Array.isArray(product.specifications) ? product.specifications : [{ label: "", value: "" }],
-                        compatibility: Array.isArray(product.compatibility) ? product.compatibility : [""],
+                        compatibility: Array.isArray(product.compatibility) 
+                            ? product.compatibility.map(item => 
+                                typeof item === 'string' 
+                                    ? { make: item, model: "", yearStart: "", yearEnd: "" } 
+                                    : item
+                              ) 
+                            : [{ make: "", model: "", yearStart: "", yearEnd: "" }],
                         tags: Array.isArray(product.tags) ? product.tags : [],
                         featured: product.featured || false,
                         newProduct: product.newProduct || false,
