@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft, Upload, X, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -33,13 +33,15 @@ const AddProduct = () => {
   });
   const { user, token } = useSelector((state) => state.auth);
 
+  const [images, setImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
   // VENDOR SCOPING: Pre-fill vendorId if user is a vendor
-  useState(() => {
+  useEffect(() => {
     if (user?.role === 'vendor' && user?.uid) {
       setFormData(prev => ({ ...prev, vendorId: user.uid }));
     }
   }, [user]);
-  const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState({
     isOpen: false,
     type: "info",
