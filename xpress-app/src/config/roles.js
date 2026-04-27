@@ -10,6 +10,7 @@ export const ROLES = {
   MANAGER: 'manager',
   MODERATOR: 'moderator',
   VENDOR: 'vendor',
+  ACCOUNTANT: 'accountant',
   CUSTOMER: 'customer',
 };
 
@@ -61,6 +62,19 @@ export const ROLE_CONFIG = {
       'manage_orders',
       'view_dashboard',
       'manage_customers',
+    ],
+  },
+  accountant: {
+    label: 'Accountant',
+    description: 'Financial auditor. Can view and manage all orders, payments, and ledger entries.',
+    color: 'bg-green-100 text-green-700 border-green-200',
+    icon: '💰',
+    level: 40,
+    permissions: [
+      'manage_orders',
+      'manage_transactions',
+      'view_dashboard',
+      'export_data',
     ],
   },
   vendor: {

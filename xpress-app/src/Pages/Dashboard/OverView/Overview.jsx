@@ -218,11 +218,13 @@ const Overview = () => {
         <>
           {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          icon={Package}
-          title="Total Products"
-          value={stats.totalProducts}
-        />
+        {user?.role !== 'accountant' && (
+          <StatCard
+            icon={Package}
+            title="Total Products"
+            value={stats.totalProducts}
+          />
+        )}
         <StatCard
           icon={DollarSign}
           title="Total Sales"
@@ -332,69 +334,71 @@ const Overview = () => {
       </div>
 
       {/* Product Performance Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
-        {/* Best Selling */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
-           <div className="flex items-center justify-between mb-8">
-              <div className="text-left">
-                <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-green-500" />
-                    Top Movers
-                </h3>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">High conversion inventory</p>
-              </div>
-              <Link to="/products" className="text-xs text-yellow-500 font-black hover:underline uppercase tracking-widest">Manage</Link>
-           </div>
-           <div className="space-y-4">
-              {performanceData.bestSelling.map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl hover:bg-gray-100 transition-all cursor-pointer border border-transparent hover:border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white text-gray-400 rounded-xl flex items-center justify-center font-black text-xs shadow-sm shadow-gray-200/50 border border-gray-100">#{i+1}</div>
-                    <div className="text-left">
-                      <p className="text-sm font-black text-gray-900 truncate max-w-[150px]">{item.name}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{item.sales} units sold</p>
+      {user?.role !== 'accountant' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          {/* Best Selling */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
+            <div className="flex items-center justify-between mb-8">
+                <div className="text-left">
+                  <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-green-500" />
+                      Top Movers
+                  </h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">High conversion inventory</p>
+                </div>
+                <Link to="/products" className="text-xs text-yellow-500 font-black hover:underline uppercase tracking-widest">Manage</Link>
+            </div>
+            <div className="space-y-4">
+                {performanceData.bestSelling.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl hover:bg-gray-100 transition-all cursor-pointer border border-transparent hover:border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white text-gray-400 rounded-xl flex items-center justify-center font-black text-xs shadow-sm shadow-gray-200/50 border border-gray-100">#{i+1}</div>
+                      <div className="text-left">
+                        <p className="text-sm font-black text-gray-900 truncate max-w-[150px]">{item.name}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{item.sales} units sold</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-green-500">{item.growth}</p>
+                      <p className="text-[10px] font-bold text-gray-400">Stock: {item.stock}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-black text-green-500">{item.growth}</p>
-                    <p className="text-[10px] font-bold text-gray-400">Stock: {item.stock}</p>
-                  </div>
-                </div>
-              ))}
-           </div>
-        </div>
+                ))}
+            </div>
+          </div>
 
-        {/* Low Performing */}
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
-           <div className="flex items-center justify-between mb-8">
-              <div className="text-left">
-                <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
-                    <TrendingDown className="w-5 h-5 text-red-500" />
-                    Stagnant Stock
-                </h3>
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Requires focus or pricing adjustment</p>
-              </div>
-              <Link to="/products" className="text-xs text-yellow-500 font-black hover:underline uppercase tracking-widest">Manage</Link>
-           </div>
-           <div className="space-y-4">
-              {performanceData.lowPerforming.map((item, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl hover:bg-gray-100 transition-all cursor-pointer border border-transparent hover:border-gray-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-white text-gray-400 rounded-xl flex items-center justify-center font-black text-xs shadow-sm shadow-gray-200/50 border border-gray-100">#{i+1}</div>
-                    <div className="text-left">
-                      <p className="text-sm font-black text-gray-900 truncate max-w-[150px]">{item.name}</p>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{item.sales} units moved</p>
+          {/* Low Performing */}
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-50">
+            <div className="flex items-center justify-between mb-8">
+                <div className="text-left">
+                  <h3 className="text-lg font-black text-gray-900 flex items-center gap-2">
+                      <TrendingDown className="w-5 h-5 text-red-500" />
+                      Stagnant Stock
+                  </h3>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">Requires focus or pricing adjustment</p>
+                </div>
+                <Link to="/products" className="text-xs text-yellow-500 font-black hover:underline uppercase tracking-widest">Manage</Link>
+            </div>
+            <div className="space-y-4">
+                {performanceData.lowPerforming.map((item, i) => (
+                  <div key={i} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl hover:bg-gray-100 transition-all cursor-pointer border border-transparent hover:border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white text-gray-400 rounded-xl flex items-center justify-center font-black text-xs shadow-sm shadow-gray-200/50 border border-gray-100">#{i+1}</div>
+                      <div className="text-left">
+                        <p className="text-sm font-black text-gray-900 truncate max-w-[150px]">{item.name}</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{item.sales} units moved</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-red-500">{item.growth}</p>
+                      <p className="text-[10px] font-bold text-gray-400">Stock: {item.stock}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-black text-red-500">{item.growth}</p>
-                    <p className="text-[10px] font-bold text-gray-400">Stock: {item.stock}</p>
-                  </div>
-                </div>
-              ))}
-           </div>
+                ))}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </>
     ) : (
       /* ALERTS TAB */
