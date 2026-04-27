@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import ProductList from "../../Components/Ui/ProductList/productList";
 import LoadingSpinner from "../../Components/LoadingSpinner";
+import { TableSkeleton } from "../../Components/Skeleton";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchProducts } from "../../productSlice";
@@ -38,9 +39,8 @@ const AllProducts = () => {
 
     if (status === "loading" && items.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center p-20 min-h-full">
-                <LoadingSpinner size="lg" color="yellow" />
-                <p className="mt-4 text-gray-500 font-bold text-xs uppercase tracking-widest animate-pulse">Syncing Inventory...</p>
+            <div className="p-6 mt-20">
+                <TableSkeleton rows={10} cols={6} />
             </div>
         );
     }

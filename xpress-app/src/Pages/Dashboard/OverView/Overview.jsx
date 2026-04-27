@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../../config/api';
 import LoadingSpinner from '../../../Components/LoadingSpinner';
 import { fetchDashboardStats, fetchAdminLogs } from '../../../dashboardSlice';
+import { StatsSkeleton, ChartSkeleton, TableSkeleton } from '../../../Components/Skeleton';
 
 const Overview = () => {
   const dispatch = useDispatch();
@@ -117,13 +118,22 @@ const Overview = () => {
     </div>
   );
 
-  // If loading and NO data yet, show localized spinner
+  // If loading and NO data yet, show skeleton layout
   if (status === "loading" && analyticsData.length === 0) {
     return (
-      <div className="flex items-center justify-center p-20 min-h-full">
-        <div className="text-center">
-          <LoadingSpinner size="lg" color="yellow" />
-          <p className="mt-4 text-gray-500 font-bold text-xs uppercase tracking-widest animate-pulse">Analyzing Performance...</p>
+      <div className="p-6 bg-gray-50 min-h-full mt-20 thin-scrollbar">
+        <div className="mb-8">
+            <h1 className="text-3xl font-black text-gray-900">Dashboard</h1>
+            <p className="text-gray-500 text-sm">Synchronizing your dealership insights...</p>
+        </div>
+        <StatsSkeleton />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <ChartSkeleton />
+          </div>
+          <div className="lg:col-span-1">
+            <TableSkeleton rows={8} cols={1} />
+          </div>
         </div>
       </div>
     );

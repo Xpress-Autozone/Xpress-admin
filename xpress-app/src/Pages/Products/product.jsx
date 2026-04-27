@@ -36,12 +36,40 @@ const AddProduct = () => {
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // DRAFT PERSISTENCE: Load draft on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('product_draft');
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        setFormData(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        console.error("Failed to load product draft", e);
+      }
+    }
+  }, []);
+
+  // DRAFT PERSISTENCE: Save draft when formData changes
+  useEffect(() => {
+    // Don't save if it's just the initial state
+    const hasData = Object.values(formData).some(val => 
+      (typeof val === 'string' && val.length > 0) || 
+      (Array.isArray(val) && val.length > 0 && (val[0]?.label !== "" || val[0]?.make !== "" || val.length > 0))
+    );
+    
+    if (hasData) {
+      const { vendorId, ...rest } = formData; // Avoid persisting vendorId if it's auto-filled
+      localStorage.setItem('product_draft', JSON.stringify(rest));
+    }
+  }, [formData]);
+
   // VENDOR SCOPING: Pre-fill vendorId if user is a vendor
   useEffect(() => {
     if (user?.role === 'vendor' && user?.uid) {
       setFormData(prev => ({ ...prev, vendorId: user.uid }));
     }
   }, [user]);
+
   const [alert, setAlert] = useState({
     isOpen: false,
     type: "info",
@@ -224,6 +252,7 @@ const AddProduct = () => {
       }
 
       showAlert("success", "Success!", "Product added successfully!");
+      localStorage.removeItem('product_draft');
       setTimeout(() => {
         navigate(-1);
       }, 1500);
