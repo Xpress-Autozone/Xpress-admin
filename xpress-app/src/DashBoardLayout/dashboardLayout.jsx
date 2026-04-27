@@ -6,21 +6,25 @@ import ProtectedRoute from '../Components/ProtectedRoute/protectedRoute';
 import { useSelector } from 'react-redux';
 
 // Import all your page components
-import Overview from '../Pages/Dashboard/OverView/Overview';
-import AllProducts from '../Pages/Products/AllProducts';
-import CategoryProducts from '../Pages/Categories/CategoryProducts';
-import AddProduct from '../Pages/Products/product';
-import EditProduct from '../Pages/Products/editProduct';
-import Vendors from '../Pages/Vendors/vendors';
-import AddVendors from '../Pages/Vendors/addVendors';
-import AdminRoles from '../Pages/AdminRoles/AdminRoles';
-import SystemAdmins from '../Pages/AdminRoles/SystemAdmins';
-import EditVendor from '../Pages/Vendors/editVendors';
-import Orders from '../Pages/Sales/Orders';
-import Payments from '../Pages/Sales/Payments';
-import Customers from '../Pages/Management/Customers/Customers';
-import useFavicon from '../hooks/useFavicon';
 import { useNotifications } from '../Contexts/NotificationContext';
+import LoadingSpinner from '../Components/LoadingSpinner';
+
+// Lazy load all page components
+const Overview = React.lazy(() => import('../Pages/Dashboard/OverView/Overview'));
+const AllProducts = React.lazy(() => import('../Pages/Products/AllProducts'));
+const CategoryProducts = React.lazy(() => import('../Pages/Categories/CategoryProducts'));
+const AddProduct = React.lazy(() => import('../Pages/Products/product'));
+const EditProduct = React.lazy(() => import('../Pages/Products/editProduct'));
+const Vendors = React.lazy(() => import('../Pages/Vendors/vendors'));
+const AddVendors = React.lazy(() => import('../Pages/Vendors/addVendors'));
+const EditVendor = React.lazy(() => import('../Pages/Vendors/editVendors'));
+const AdminRoles = React.lazy(() => import('../Pages/AdminRoles/AdminRoles'));
+const SystemAdmins = React.lazy(() => import('../Pages/AdminRoles/SystemAdmins'));
+const Orders = React.lazy(() => import('../Pages/Sales/Orders'));
+const Payments = React.lazy(() => import('../Pages/Sales/Payments'));
+const Customers = React.lazy(() => import('../Pages/Management/Customers/Customers'));
+
+import useFavicon from '../hooks/useFavicon';
 
 function DashboardLayout() {
   const { hasNewInquiries } = useNotifications();
@@ -43,33 +47,39 @@ function DashboardLayout() {
 
           {/* Main content area */}
           <main className='flex-1 bg-gray-100 overflow-y-auto h-screen'>
-            <Routes>
-              {/* Default redirect based on role */}
-              <Route path="/" element={<Navigate to={isVendor ? "/products" : "/overview"} replace />} />
+            <React.Suspense fallback={
+              <div className="flex items-center justify-center min-h-full p-20">
+                <LoadingSpinner size="lg" color="yellow" />
+              </div>
+            }>
+              <Routes>
+                {/* Default redirect based on role */}
+                <Route path="/" element={<Navigate to={isVendor ? "/products" : "/overview"} replace />} />
 
-              {/* All your routes */}
-              <Route path="/overview" element={<Overview />} />
+                {/* All your routes */}
+                <Route path="/overview" element={<Overview />} />
 
-              {/* Products Management */}
-              <Route path="/products" element={<AllProducts />} />
-              <Route path="/add-products" element={<AddProduct />} />
-              <Route path="/edit-product/:id" element={<EditProduct />} />
+                {/* Products Management */}
+                <Route path="/products" element={<AllProducts />} />
+                <Route path="/add-products" element={<AddProduct />} />
+                <Route path="/edit-product/:id" element={<EditProduct />} />
 
 
-              {/* Other Routes */}
-              <Route path="/vendors" element={<Vendors />} />
-              <Route path="/add-vendors" element={<AddVendors />} />
-              <Route path="/edit-vendor/:id" element={<EditVendor />} />
-              <Route path="/admin-management" element={<SystemAdmins />} />
-              <Route path="/admin-roles" element={<AdminRoles />} />
+                {/* Other Routes */}
+                <Route path="/vendors" element={<Vendors />} />
+                <Route path="/add-vendors" element={<AddVendors />} />
+                <Route path="/edit-vendor/:id" element={<EditVendor />} />
+                <Route path="/admin-management" element={<SystemAdmins />} />
+                <Route path="/admin-roles" element={<AdminRoles />} />
 
-              {/* Sales & Logistics */}
-              <Route path="/orders" element={<Orders />} />
-              <Route path="/accounting" element={<Payments />} />
+                {/* Sales & Logistics */}
+                <Route path="/orders" element={<Orders />} />
+                <Route path="/accounting" element={<Payments />} />
 
-              {/* CRM / User Management */}
-              <Route path="/customers" element={<Customers />} />
-            </Routes>
+                {/* CRM / User Management */}
+                <Route path="/customers" element={<Customers />} />
+              </Routes>
+            </React.Suspense>
           </main>
         </div>
       </div>
