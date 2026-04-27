@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { API_BASE_URL } from '../../config/api';
 import LoadingSpinner from '../../Components/LoadingSpinner';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import logo from '../../assets/Xpress-Autozone-Logo.png';
 
 const Payments = () => {
@@ -158,7 +158,7 @@ const Payments = () => {
         doc.setFont("helvetica", "bold");
         doc.text("Transaction Summary", 15, 50);
         
-        doc.autoTable({
+        autoTable(doc, {
             startY: 55,
             head: [['Description', 'Details']],
             body: [
