@@ -93,7 +93,21 @@ const Sidebar = () => {
 
   const NavItem = ({ item }) => {
     const IconComponent = item.icon;
-    const isActive = location.pathname === item.path || (item.slug && location.pathname === `/categories/${item.slug}`);
+    const searchParams = new URLSearchParams(location.search);
+    const categoryQuery = searchParams.get('category');
+    
+    // Improved active state logic:
+    // 1. If it's a category link: match based on the slug and 'category' query param
+    // 2. If it's 'Total Inventory' (/products): only highlight if NO category is selected
+    // 3. Otherwise: match pathname exactly
+    let isActive = false;
+    if (item.slug) {
+        isActive = location.pathname === '/products' && categoryQuery === item.slug;
+    } else if (item.path === '/products') {
+        isActive = location.pathname === '/products' && !categoryQuery;
+    } else {
+        isActive = location.pathname === item.path;
+    }
 
     return (
       <li>
