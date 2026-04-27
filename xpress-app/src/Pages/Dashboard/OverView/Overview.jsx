@@ -1,28 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
-import { Package, DollarSign, ShoppingCart, CheckCircle, TrendingUp, TrendingDown, AlertTriangle, Info, Bell, Activity, UserPlus, X } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { Package, DollarSign, ShoppingCart, CheckCircle, TrendingUp, TrendingDown, AlertTriangle, Info, Bell, Activity, UserPlus, X, RefreshCw } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { API_BASE_URL } from '../../../config/api';
 import LoadingSpinner from '../../../Components/LoadingSpinner';
+import { fetchDashboardStats, fetchAdminLogs } from '../../../dashboardSlice';
 
 const Overview = () => {
+  const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const products = useSelector((state) => state.products.items || []);
+  const { stats, logs, status, lastFetched, error: reduxError } = useSelector((state) => state.dashboard);
 
-  const [stats, setStats] = useState({
-    totalProducts: 0,
-    totalSales: 0,
-    newOrders: 0,
-    completedOrders: 0
-  });
-
-  const [analyticsData, setAnalyticsData] = useState([]);
   const [activeMetric, setActiveMetric] = useState('revenue'); // revenue, orders, customers
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('analytics');
-  const [adminLogs, setAdminLogs] = useState([]);
+  const [localError, setLocalError] = useState(null);
 
   const lowStockProducts = products.filter(p => {
     const stock = p.stock || p.quantity || 0;
@@ -30,7 +23,7 @@ const Overview = () => {
     return stock <= threshold;
   });
 
-  // Calculate some simple performance data from Redux if available
+  // Simple performance data
   const performanceData = {
     bestSelling: products.slice(0, 3).map((p, i) => ({
         name: p.itemName,
@@ -47,65 +40,21 @@ const Overview = () => {
   };
 
   useEffect(() => {
-    if (token) {
-      fetchDashboardData();
+    // Only fetch if we don't have data or it's older than 5 minutes
+    const shouldFetch = !lastFetched || (Date.now() - lastFetched > 5 * 60 * 1000);
+    if (token && shouldFetch) {
+      dispatch(fetchDashboardStats());
+      dispatch(fetchAdminLogs());
     }
-  }, [token]);
-
-  const fetchDashboardData = async () => {
-    if (!token) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}/stats/dashboard`, {
-        headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-        },
-      });
-
-      if (!response.ok) {
-          if (response.status === 404) {
-              throw new Error("Analytics API not found (404). Please ensure you have pushed your backend changes to Render.");
-          }
-          throw new Error(`Connection failed: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      if (result.success) {
-          setStats({
-              totalProducts: result.data.totalProducts,
-              totalSales: result.data.totalSales,
-              newOrders: result.data.newOrders,
-              completedOrders: result.data.completedOrders
-          });
-          setAnalyticsData(result.data.analytics);
-      } else {
-          setError(result.message || "Failed to load statistics");
-      }
-
-      // Fetch admin logs
-      const logsResponse = await fetch(`${API_BASE_URL}/admin-logs`, {
-        headers: {
-            ...(token && { Authorization: `Bearer ${token}` }),
-        },
-      });
-      if (logsResponse.ok) {
-          const logsResult = await logsResponse.json();
-          if (logsResult.success) {
-              setAdminLogs(logsResult.data);
-          }
-      }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [token, dispatch, lastFetched]);
 
   const refreshData = () => {
-    fetchDashboardData();
+    dispatch(fetchDashboardStats());
+    dispatch(fetchAdminLogs());
   };
+
+  const analyticsData = stats.analytics || [];
+  const displayError = localError || reduxError;
 
   const getMetricConfig = () => {
     switch(activeMetric) {
@@ -168,26 +117,32 @@ const Overview = () => {
     </div>
   );
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <LoadingSpinner size="lg" color="yellow" />
-    </div>
-  );
+  // If loading and NO data yet, show localized spinner
+  if (status === "loading" && analyticsData.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-20 min-h-full">
+        <div className="text-center">
+          <LoadingSpinner size="lg" color="yellow" />
+          <p className="mt-4 text-gray-500 font-bold text-xs uppercase tracking-widest animate-pulse">Analyzing Performance...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-full mt-20 thin-scrollbar">
       {/* Error Alert */}
-      {error && (
+      {displayError && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
           <div className="flex items-center gap-3 text-red-700">
             <AlertTriangle className="w-5 h-5 flex-shrink-0" />
             <div className="text-left">
               <p className="text-xs font-bold uppercase tracking-wider">Connection Issue</p>
-              <p className="text-sm font-medium">{error}</p>
+              <p className="text-sm font-medium">{displayError}</p>
             </div>
           </div>
           <button 
-            onClick={() => setError(null)}
+            onClick={() => setLocalError(null)}
             className="p-1 hover:bg-red-100 rounded-lg transition-colors"
           >
             <X className="w-4 h-4 text-red-400" />
@@ -202,12 +157,21 @@ const Overview = () => {
             <p className="text-gray-500 text-sm">Welcome back. Here's what's happening today.</p>
         </div>
         
-        <button
-          onClick={refreshData}
-          className="bg-white border border-gray-200 text-gray-900 px-4 py-2 rounded-xl transition-all hover:bg-gray-50 font-bold text-sm shadow-sm"
-        >
-          Refresh Data
-        </button>
+        <div className="flex items-center gap-4">
+          {status === "loading" && (
+            <div className="flex items-center gap-2 text-gray-400 text-[10px] font-bold uppercase tracking-widest">
+              <RefreshCw className="w-3 h-3 animate-spin" />
+              Syncing...
+            </div>
+          )}
+          <button
+            onClick={refreshData}
+            disabled={status === "loading"}
+            className="bg-white border border-gray-200 text-gray-900 px-4 py-2 rounded-xl transition-all hover:bg-gray-50 font-bold text-sm shadow-sm disabled:opacity-50"
+          >
+            Refresh Data
+          </button>
+        </div>
       </div>
 
       {/* Tab Switcher */}
@@ -479,8 +443,8 @@ const Overview = () => {
            </div>
           
           <div className="bg-white rounded-3xl border border-gray-50 overflow-hidden shadow-sm">
-            {adminLogs.length > 0 ? adminLogs.slice(0, 10).map((log, i) => (
-              <div key={i} className="flex items-center justify-between p-5 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+            {logs.length > 0 ? logs.slice(0, 10).map((log, i) => (
+              <div key={i} className="flex items-center justify-center min-h-[60px] p-5 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center gap-4">
                   <div className={`w-3 h-3 rounded-full shadow-sm ${
                     log.action.includes('Delete') || log.action.includes('Fail') ? 'bg-red-500 border-2 border-red-100' : 

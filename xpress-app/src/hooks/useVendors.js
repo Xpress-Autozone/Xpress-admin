@@ -1,47 +1,22 @@
-import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useCallback } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { API_BASE_URL } from "../config/api";
+import { fetchVendors } from "../vendorSlice";
 
 const useVendors = () => {
-  const [vendors, setVendors] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const dispatch = useDispatch();
+  const { items: vendors, status, error, lastFetched } = useSelector((state) => state.vendors);
   const { token } = useSelector((state) => state.auth);
 
-  const fetchVendors = async () => {
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_BASE_URL}/vendors`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Handle non-JSON responses (e.g. Render cold-start HTML page)
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Backend server is starting up. Please try again in a moment.");
-      }
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Failed to fetch vendors");
-      setVendors(data.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchVendors();
-  }, [token, refreshKey]);
+    // Cache for 10 minutes
+    const shouldFetch = !lastFetched || (Date.now() - lastFetched > 10 * 60 * 1000);
+    if (token && shouldFetch) {
+      dispatch(fetchVendors());
+    }
+  }, [token, dispatch, lastFetched]);
 
-  const deleteVendor = async (id) => {
+  const deleteVendor = useCallback(async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/vendors/${id}`, {
         method: "DELETE",
@@ -49,14 +24,14 @@ const useVendors = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to delete vendor");
-      setRefreshKey(prev => prev + 1);
+      dispatch(fetchVendors());
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
     }
-  };
+  }, [token, dispatch]);
 
-  const updateVendor = async (id, vendorData) => {
+  const updateVendor = useCallback(async (id, vendorData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/vendors/${id}`, {
         method: "PUT",
@@ -68,14 +43,21 @@ const useVendors = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to update vendor");
-      setRefreshKey(prev => prev + 1);
+      dispatch(fetchVendors());
       return { success: true };
     } catch (err) {
       return { success: false, error: err.message };
     }
-  };
+  }, [token, dispatch]);
 
-  return { vendors, loading, error, deleteVendor, updateVendor, refresh: () => setRefreshKey(prev => prev + 1) };
+  return { 
+    vendors, 
+    loading: status === "loading", 
+    error, 
+    deleteVendor, 
+    updateVendor, 
+    refresh: () => dispatch(fetchVendors()) 
+  };
 };
 
 export default useVendors;

@@ -8,10 +8,11 @@ const Vendor = () => {
   const navigate = useNavigate();
   const { vendors, loading, error, deleteVendor } = useVendors();
 
-  if (loading) {
+  if (loading && vendors.length === 0) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex flex-col items-center justify-center p-20 min-h-full">
         <LoadingSpinner size="lg" color="yellow" />
+        <p className="mt-4 text-gray-500 font-bold text-xs uppercase tracking-widest animate-pulse">Fetching Vendors...</p>
       </div>
     );
   }
