@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Search, Plus, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Download, Building2, X } from 'lucide-react';
+import { DollarSign, Search, Plus, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Download, Building2, X, FileText } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { API_BASE_URL } from '../../config/api';
 import LoadingSpinner from '../../Components/LoadingSpinner';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import logo from '../../assets/Xpress-Autozone-Logo.png';
 
 const Payments = () => {
-    const { token } = useSelector((state) => state.auth);
+    const { user, token } = useSelector((state) => state.auth);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
     const [ledger, setLedger] = useState([]);
@@ -98,10 +101,10 @@ const Payments = () => {
     };
 
     const exportToCSV = () => {
-        const headers = ["ID", "Reference/Order", "Method", "Type", "Amount", "Status", "Date", "Recorded By"];
+        const headers = ["Transaction ID", "Reference/Order", "Method", "Type", "Amount (GHC)", "Status", "Date", "Recorded By"];
         const rows = ledger.map(t => [
             t.transactionId || t.id,
-            t.orderId,
+            t.orderId || t.reference || 'Manual',
             t.method,
             t.type,
             t.amount,
@@ -110,17 +113,92 @@ const Payments = () => {
             t.recordedBy || 'System'
         ]);
 
-        const csvContent = "data:text/csv;charset=utf-8," 
-            + headers.join(",") + "\n"
-            + rows.map(r => r.join(",")).join("\n");
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(r => r.map(cell => `"${cell}"`).join(","))
+        ].join("\n");
 
-        const encodedUri = encodeURI(csvContent);
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `accounting_export_${new Date().toISOString().split('T')[0]}.csv`);
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Xpress_Accounting_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const exportToPDF = (transaction) => {
+        const doc = new jsPDF();
+        const dateStr = transaction.createdAt ? new Date(transaction.createdAt).toLocaleString() : new Date().toLocaleString();
+        
+        // Add Logo
+        doc.addImage(logo, 'PNG', 15, 10, 40, 25);
+        
+        // Header Info
+        doc.setFontSize(22);
+        doc.setTextColor(44, 62, 80);
+        doc.text("OFFICIAL RECEIPT", 105, 25, { align: 'center' });
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("Xpress Autozone Ghana", 195, 15, { align: 'right' });
+        doc.text("Premium Auto Parts & Logistics", 195, 20, { align: 'right' });
+        doc.text("Accra, Ghana", 195, 25, { align: 'right' });
+
+        // Divider
+        doc.setDrawColor(241, 196, 15);
+        doc.setLineWidth(1);
+        doc.line(15, 40, 195, 40);
+
+        // Transaction Details Section
+        doc.setFontSize(12);
+        doc.setTextColor(44, 62, 80);
+        doc.setFont("helvetica", "bold");
+        doc.text("Transaction Summary", 15, 50);
+        
+        doc.autoTable({
+            startY: 55,
+            head: [['Description', 'Details']],
+            body: [
+                ['Transaction ID', transaction.transactionId || transaction.id],
+                ['Reference/Order #', transaction.orderId || transaction.reference || 'N/A'],
+                ['Payment Method', transaction.method],
+                ['Transaction Type', transaction.type],
+                ['Date & Time', dateStr],
+                ['Status', transaction.status.toUpperCase()],
+                ['Recorded By', transaction.recordedBy || 'System/Admin']
+            ],
+            theme: 'striped',
+            headStyles: { fillColor: [241, 196, 15], textColor: 255 },
+            styles: { fontSize: 10 }
+        });
+
+        // Amount Box
+        const finalY = doc.lastAutoTable.finalY + 10;
+        doc.setFillColor(248, 249, 250);
+        doc.rect(130, finalY, 65, 25, 'F');
+        doc.setDrawColor(230);
+        doc.rect(130, finalY, 65, 25, 'D');
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text("TOTAL AMOUNT", 135, finalY + 10);
+        
+        doc.setFontSize(16);
+        doc.setTextColor(0);
+        doc.setFont("helvetica", "bold");
+        doc.text(`GHC ${transaction.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, 135, finalY + 20);
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.setFont("helvetica", "italic");
+        doc.text("This is a computer-generated document. No signature required.", 105, 280, { align: 'center' });
+        doc.text(`Downloaded on: ${new Date().toLocaleString()}`, 105, 285, { align: 'center' });
+
+        doc.save(`Receipt_${transaction.transactionId || transaction.id}.pdf`);
     };
 
     /* 
@@ -225,17 +303,18 @@ const Payments = () => {
                                     <th className="px-6 py-4">Method</th>
                                     <th className="px-6 py-4 text-center">Type</th>
                                     <th className="px-6 py-4">Amount</th>
-                                    <th className="px-6 py-4 text-right">Status</th>
+                                    <th className="px-6 py-4 text-center">Status</th>
+                                    <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
                                 {ledger.length === 0 ? (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-400 text-sm italic">No records found in the ledger.</td>
+                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-400 text-sm italic">No records found in the ledger.</td>
                                     </tr>
                                 ) : ledger.map((pay) => (
                                     <tr key={pay.id} className="hover:bg-gray-50 transition-colors group">
-                                        <td className="px-6 py-4">
+                                        <td className="px-6 py-4 text-left">
                                             <div className="text-sm font-semibold text-gray-900">{pay.transactionId || pay.id}</div>
                                             <div className="text-[10px] text-gray-400 font-medium">
                                                 {pay.createdAt ? new Date(pay.createdAt).toLocaleString() : 'N/A'}
@@ -244,7 +323,7 @@ const Payments = () => {
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-gray-900 font-medium flex items-center gap-1.5">
                                                 <Building2 className="w-3.5 h-3.5 text-gray-400" />
-                                                {pay.orderId}
+                                                {pay.orderId || pay.reference || 'Manual'}
                                             </div>
                                             {pay.notes && <div className="text-[10px] text-gray-500 mt-1 max-w-[200px] truncate">{pay.notes}</div>}
                                         </td>
@@ -259,10 +338,20 @@ const Payments = () => {
                                         <td className={`px-6 py-4 font-bold ${pay.type === 'Received' ? 'text-gray-900' : 'text-red-700'}`}>
                                             {pay.type === 'Payout' ? '-' : ''}GHC {pay.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-6 py-4 text-center">
                                             <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold text-green-700 bg-green-50 border border-green-100">
                                                 {pay.status}
                                             </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button 
+                                                onClick={() => exportToPDF(pay)}
+                                                className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all flex items-center gap-2 text-[10px] font-bold ml-auto"
+                                                title="Download Receipt (PDF)"
+                                            >
+                                                <FileText className="w-4 h-4" />
+                                                <span className="hidden group-hover:block">PDF</span>
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
