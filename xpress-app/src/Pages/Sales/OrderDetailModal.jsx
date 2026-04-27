@@ -1,14 +1,43 @@
 import React from 'react';
-import { X, Package, User, MapPin, Truck, CheckCircle, Clock, MessageSquare, CreditCard, Loader2 } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CheckCircle, Clock, MessageSquare, CreditCard, Loader2, Trash2, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { API_BASE_URL } from '../../config/api';
 
 const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
-  const { token } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   if (!isOpen || !order) return null;
+
+  const handleDeleteOrder = async () => {
+    try {
+      setIsUpdating(true);
+      const response = await fetch(`${API_BASE_URL}/deleteOrder/${order.docId || order.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ hardDelete: true })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        onUpdate?.();
+        onClose();
+      } else {
+        alert(result.message || "Failed to delete order");
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+      alert("An error occurred while deleting the order.");
+    } finally {
+      setIsUpdating(false);
+      setShowDeleteConfirm(false);
+    }
+  };
 
   // Use real items from the order, or fall back to a parsed summary
   const orderItems = order.rawItems?.length > 0
@@ -199,13 +228,25 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between gap-3">
-            <button 
-              onClick={() => handleUpdateStatus('cancelled')}
-              disabled={isUpdating}
-              className="px-5 py-2 text-sm font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent disabled:opacity-50"
-            >
-              Cancel Order
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleUpdateStatus('cancelled')}
+                disabled={isUpdating}
+                className="px-4 py-2 text-[10px] font-black uppercase text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+              >
+                Cancel Order
+              </button>
+              {user?.role === 'admin' && (
+                <button 
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isUpdating}
+                  className="px-4 py-2 text-[10px] font-black uppercase text-gray-400 hover:text-red-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Hard Delete
+                </button>
+              )}
+            </div>
             <div className="flex gap-3">
               <button onClick={onClose} disabled={isUpdating} className="px-5 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-50">
                 Close
@@ -223,6 +264,37 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
             </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Overlay */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 text-center">
+            <div className="p-8">
+              <div className="w-20 h-20 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-10 h-10" />
+              </div>
+              <h3 className="text-2xl font-black text-gray-900 mb-2">Delete Order?</h3>
+              <p className="text-sm text-gray-500 mb-8 leading-relaxed font-medium">
+                You are about to permanently remove <span className="font-bold text-gray-900">{order.id}</span> from the system. This cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-4 bg-gray-100 text-gray-700 font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleDeleteOrder}
+                  className="flex-1 py-4 bg-red-600 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl hover:bg-red-700 transition-colors shadow-xl shadow-red-200"
+                >
+                  Confirm Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

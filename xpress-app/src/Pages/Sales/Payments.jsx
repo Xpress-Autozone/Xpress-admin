@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, Search, Plus, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Download, Building2, X, FileText } from 'lucide-react';
+import { DollarSign, Search, Plus, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Download, Building2, X, FileText, Trash2, Eye, AlertCircle } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { API_BASE_URL } from '../../config/api';
 import LoadingSpinner from '../../Components/LoadingSpinner';
@@ -26,6 +26,8 @@ const Payments = () => {
         notes: '',
         reference: ''
     });
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // stores ID of transaction to delete
 
     useEffect(() => {
         if (token) {
@@ -67,6 +69,26 @@ const Payments = () => {
             console.error("Error fetching accounting data:", err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDeleteTransaction = async (id) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/transactions/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                },
+            });
+            if (response.ok) {
+                setShowDeleteConfirm(null);
+                fetchAccountingData();
+            } else {
+                const err = await response.json();
+                alert(err.message || "Failed to delete transaction");
+            }
+        } catch (err) {
+            console.error("Error deleting transaction:", err);
         }
     };
 
@@ -344,14 +366,31 @@ const Payments = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <button 
-                                                onClick={() => exportToPDF(pay)}
-                                                className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all flex items-center gap-2 text-[10px] font-bold ml-auto"
-                                                title="Download Receipt (PDF)"
-                                            >
-                                                <FileText className="w-4 h-4" />
-                                                <span className="hidden group-hover:block">PDF</span>
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button 
+                                                    onClick={() => setSelectedTransaction(pay)}
+                                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                    title="View Details"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => exportToPDF(pay)}
+                                                    className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all"
+                                                    title="Download Receipt"
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                </button>
+                                                {user?.role === 'admin' && (
+                                                    <button 
+                                                        onClick={() => setShowDeleteConfirm(pay.id)}
+                                                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                        title="Delete Entry"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -479,6 +518,106 @@ const Payments = () => {
                                 Confirm & Record Entry
                             </button>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* View Transaction Details Modal */}
+            {selectedTransaction && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 text-left">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                            <div>
+                                <h2 className="text-xl font-bold text-gray-900">Transaction Details</h2>
+                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{selectedTransaction.transactionId || selectedTransaction.id}</p>
+                            </div>
+                            <button onClick={() => setSelectedTransaction(null)} className="text-gray-400 hover:text-gray-600">
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Reference / Order</label>
+                                    <p className="text-sm font-bold text-gray-900">{selectedTransaction.orderId || selectedTransaction.reference || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Amount</label>
+                                    <p className={`text-sm font-black ${selectedTransaction.type === 'Received' ? 'text-green-600' : 'text-red-600'}`}>
+                                        GHC {selectedTransaction.amount?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Payment Method</label>
+                                    <p className="text-sm font-medium text-gray-700">{selectedTransaction.method}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Date Recorded</label>
+                                    <p className="text-sm font-medium text-gray-700">{selectedTransaction.createdAt ? new Date(selectedTransaction.createdAt).toLocaleString() : 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Recorded By</label>
+                                    <p className="text-sm font-medium text-gray-700">{selectedTransaction.recordedBy || 'System/Admin'}</p>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Status</label>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 border border-green-100">
+                                        {selectedTransaction.status}
+                                    </span>
+                                </div>
+                            </div>
+                            {selectedTransaction.notes && (
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase mb-2">Internal Notes</label>
+                                    <p className="text-sm text-gray-600 leading-relaxed italic">"{selectedTransaction.notes}"</p>
+                                </div>
+                            )}
+                            <div className="flex justify-end gap-3 pt-4">
+                                <button 
+                                    onClick={() => exportToPDF(selectedTransaction)}
+                                    className="px-4 py-2 bg-yellow-400 text-white rounded-lg text-xs font-bold hover:bg-yellow-500 transition-colors flex items-center gap-2"
+                                >
+                                    <FileText className="w-4 h-4" /> Download PDF Receipt
+                                </button>
+                                <button 
+                                    onClick={() => setSelectedTransaction(null)}
+                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-200 transition-colors"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 text-center">
+                        <div className="p-6">
+                            <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <AlertCircle className="w-8 h-8" />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Transaction?</h3>
+                            <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                                This action will permanently remove this entry from the ledger. This cannot be undone.
+                            </p>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => setShowDeleteConfirm(null)}
+                                    className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={() => handleDeleteTransaction(showDeleteConfirm)}
+                                    className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

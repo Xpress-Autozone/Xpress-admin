@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, Search, Filter, MessageSquare, Clock, CheckCircle2, Truck, ExternalLink, Package, AlertCircle, RefreshCw } from 'lucide-react';
+import { ShoppingCart, Search, Filter, MessageSquare, Clock, CheckCircle2, Truck, ExternalLink, Package, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, setPage } from '../../orderSlice';
 import LoadingSpinner from '../../Components/LoadingSpinner';
@@ -13,6 +13,8 @@ const Orders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // stores docId
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Only fetch if we don't have data, or it's older than 5 minutes, or page changed
@@ -24,6 +26,32 @@ const Orders = () => {
 
   const handleRefresh = () => {
     dispatch(fetchOrders({ page: pagination.page }));
+  };
+
+  const handleDeleteOrder = async (id) => {
+    try {
+      setIsDeleting(true);
+      const response = await fetch(`${API_BASE_URL}/deleteOrder/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ hardDelete: true })
+      });
+
+      if (response.ok) {
+        setShowDeleteConfirm(null);
+        handleRefresh();
+      } else {
+        const err = await response.json();
+        alert(err.message || "Failed to delete order");
+      }
+    } catch (error) {
+      console.error("Error deleting order:", error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const orders = useMemo(() => {
@@ -220,11 +248,20 @@ const Orders = () => {
                           </button>
                         )}
                         <button 
-                          onClick={() => { setSelectedOrder(order); setIsModalOpen(true); }}
+                          onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setIsModalOpen(true); }}
                           className="p-2 text-gray-300 hover:text-gray-900 transition-colors"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </button>
+                        {user?.role === 'admin' && (
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm(order.docId); }}
+                            className="p-2 text-gray-300 hover:text-red-600 transition-colors"
+                            title="Delete Order"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -260,8 +297,40 @@ const Orders = () => {
           onClose={() => setIsModalOpen(false)} 
           onUpdate={handleRefresh}
       />
+
+      {/* Delete Confirmation Overlay */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 text-center">
+            <div className="p-6">
+              <div className="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Order?</h3>
+              <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+                Permanently remove this order from the system? This cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setShowDeleteConfirm(null)}
+                  disabled={isDeleting}
+                  className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleDeleteOrder(showDeleteConfirm)}
+                  disabled={isDeleting}
+                  className="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-200 disabled:opacity-50 flex items-center justify-center"
+                >
+                  {isDeleting ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Yes, Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
-};
+);
 
 export default Orders;
