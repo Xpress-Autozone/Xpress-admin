@@ -19,26 +19,43 @@ export function NetworkStatusProvider({ children }) {
   const checkIntervalRef = useRef(null);
 
   // Lightweight ping to verify API reachability
-  const checkApiHealth = useCallback(async () => {
+  const checkApiHealth = useCallback(async (retryCount = 3) => {
     if (!navigator.onLine) {
       setIsApiReachable(false);
       return false;
     }
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-      const response = await fetch(`${API_BASE_URL}/products?limit=1`, {
-        method: 'GET',
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      const reachable = response.ok || response.status === 401;
-      setIsApiReachable(reachable);
-      return reachable;
-    } catch {
-      setIsApiReachable(false);
-      return false;
-    }
+
+    const attempt = async (count) => {
+      try {
+        const controller = new AbortController();
+        // Increase timeout to 15s for Render cold starts
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        
+        const response = await fetch(`${API_BASE_URL}/health`, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        
+        // Any response from our server (even 4xx) means the server is reachable
+        const reachable = response.status >= 200 && response.status < 500;
+        if (reachable) {
+          setIsApiReachable(true);
+          return true;
+        }
+        throw new Error("Unreachable");
+      } catch (err) {
+        if (count > 1) {
+          // Wait 2s before retrying
+          await new Promise(r => setTimeout(r, 2000));
+          return attempt(count - 1);
+        }
+        setIsApiReachable(false);
+        return false;
+      }
+    };
+
+    return attempt(retryCount);
   }, []);
 
   // Handle browser online/offline events
