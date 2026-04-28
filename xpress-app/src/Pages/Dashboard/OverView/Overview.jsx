@@ -10,7 +10,7 @@ import { StatsSkeleton, ChartSkeleton, TableSkeleton } from '../../../Components
 
 const Overview = () => {
   const dispatch = useDispatch();
-  const { token } = useSelector((state) => state.auth);
+  const { token, user } = useSelector((state) => state.auth);
   const products = useSelector((state) => state.products.items || []);
   const { stats, logs, status, lastFetched, error: reduxError } = useSelector((state) => state.dashboard);
 
