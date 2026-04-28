@@ -56,6 +56,15 @@ const Orders = () => {
   };
 
   const orders = useMemo(() => {
+    const formatDate = (dateValue) => {
+      if (!dateValue) return 'N/A';
+      if (typeof dateValue === 'object' && dateValue._seconds) {
+        return new Date(dateValue._seconds * 1000).toLocaleDateString();
+      }
+      const date = new Date(dateValue);
+      return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
+    };
+
     return (rawOrders || []).map(order => {
       // VENDOR SCOPING
       const itemsToDisplay = user?.role === 'vendor' 
@@ -76,7 +85,7 @@ const Orders = () => {
         status: order.orderStatus || order.status || 'pending',
         paymentStatus: order.paymentStatus || 'pending',
         paymentMethod: order.paymentMethod || 'N/A',
-        date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A',
+        date: formatDate(order.createdAt),
         whatsapp: order.customerPhone || order.customer?.phone || '',
         address: order.deliveryAddress || order.address || '',
         rawItems: itemsToDisplay,

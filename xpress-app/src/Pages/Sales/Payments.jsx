@@ -8,6 +8,19 @@ import autoTable from 'jspdf-autotable';
 import logo from '../../assets/Xpress-Autozone-Logo.png';
 
 const Payments = () => {
+    const formatDate = (dateValue) => {
+        if (!dateValue) return 'N/A';
+        
+        // Handle Firestore Timestamp object
+        if (typeof dateValue === 'object' && dateValue._seconds) {
+            return new Date(dateValue._seconds * 1000).toLocaleString();
+        }
+        
+        // Handle ISO strings, milliseconds, or Date objects
+        const date = new Date(dateValue);
+        return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleString();
+    };
+
     const { user, token } = useSelector((state) => state.auth);
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
@@ -131,7 +144,7 @@ const Payments = () => {
             t.type,
             t.amount,
             t.status,
-            t.createdAt ? new Date(t.createdAt).toLocaleString() : 'N/A',
+            formatDate(t.createdAt),
             t.recordedBy || 'System'
         ]);
 
@@ -153,7 +166,7 @@ const Payments = () => {
 
     const exportToPDF = (transaction) => {
         const doc = new jsPDF();
-        const dateStr = transaction.createdAt ? new Date(transaction.createdAt).toLocaleString() : new Date().toLocaleString();
+        const dateStr = formatDate(transaction.createdAt);
         
         // Add Logo
         doc.addImage(logo, 'PNG', 15, 10, 40, 25);
@@ -339,7 +352,7 @@ const Payments = () => {
                                         <td className="px-6 py-4 text-left">
                                             <div className="text-sm font-semibold text-gray-900">{pay.transactionId || pay.id}</div>
                                             <div className="text-[10px] text-gray-400 font-medium">
-                                                {pay.createdAt ? new Date(pay.createdAt).toLocaleString() : 'N/A'}
+                                                {formatDate(pay.createdAt)}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -414,7 +427,7 @@ const Payments = () => {
                                         <tr key={order.id} className="hover:bg-orange-50/30 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="text-sm font-bold text-gray-900">{order.orderId}</div>
-                                                <div className="text-[10px] text-gray-500">{new Date(order.date).toLocaleString()}</div>
+                                                <div className="text-[10px] text-gray-500">{formatDate(order.date)}</div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-600 font-medium">{order.method}</td>
                                             <td className="px-6 py-4 font-bold text-gray-900">GHC {order.amount?.toLocaleString()}</td>
@@ -553,7 +566,7 @@ const Payments = () => {
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Date Recorded</label>
-                                    <p className="text-sm font-medium text-gray-700">{selectedTransaction.createdAt ? new Date(selectedTransaction.createdAt).toLocaleString() : 'N/A'}</p>
+                                    <p className="text-sm font-medium text-gray-700">{formatDate(selectedTransaction.createdAt)}</p>
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Recorded By</label>

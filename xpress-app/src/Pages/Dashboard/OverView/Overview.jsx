@@ -466,15 +466,26 @@ const Overview = () => {
                     'bg-green-400 border-2 border-green-100'
                   }`}></div>
                   <div className="text-left">
-                    <p className="text-sm font-bold text-gray-700">{log.action}</p>
-                    <p className="text-xs text-gray-500">{log.details}</p>
+                    <p className="text-sm font-bold text-gray-700">
+                      {typeof log.action === 'object' ? JSON.stringify(log.action) : log.action}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {typeof log.details === 'object' ? JSON.stringify(log.details) : log.details}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[11px] font-bold text-gray-400 uppercase tracking-tighter whitespace-nowrap block">
-                    {new Date(log.timestamp).toLocaleDateString()}
+                    {(() => {
+                      const d = log.timestamp;
+                      if (!d) return 'N/A';
+                      if (typeof d === 'object' && d._seconds) return new Date(d._seconds * 1000).toLocaleDateString();
+                      return new Date(d).toLocaleDateString();
+                    })()}
                   </span>
-                  <span className="text-[10px] text-gray-400">by {log.adminEmail}</span>
+                  <span className="text-[10px] text-gray-400">
+                    by {typeof log.adminEmail === 'object' ? (log.adminEmail.email || log.adminEmail.displayName || 'Unknown Admin') : log.adminEmail}
+                  </span>
                 </div>
               </div>
             )) : (
