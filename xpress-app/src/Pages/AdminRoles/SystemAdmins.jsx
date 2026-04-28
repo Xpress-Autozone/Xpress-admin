@@ -182,7 +182,12 @@ const SystemAdmins = () => {
                                     {filteredUsers.slice(0, 50).map((user) => (
                                         <tr key={user.uid} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-4 py-3">
-                                                <div className="text-sm font-semibold text-gray-900">{user.displayName || 'N/A'}</div>
+                                                <div className="text-sm font-semibold text-gray-900 flex items-center">
+                                                    {user.displayName || 'N/A'}
+                                                    {user.uid === currentUser?.uid && (
+                                                        <span className="ml-2 text-[8px] bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full font-black uppercase tracking-widest border border-blue-200">You</span>
+                                                    )}
+                                                </div>
                                                 <div className="text-xs text-gray-400">{user.email}</div>
                                             </td>
                                             <td className="px-4 py-3">
@@ -194,7 +199,8 @@ const SystemAdmins = () => {
                                                 <select
                                                     value={selectedRole[user.uid] || user.role || 'customer'}
                                                     onChange={(e) => setSelectedRole(prev => ({ ...prev, [user.uid]: e.target.value }))}
-                                                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
+                                                    disabled={user.uid === currentUser?.uid}
+                                                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     <option value="customer">⚪ Customer</option>
                                                     {assignableRoles.map(role => (
@@ -209,7 +215,8 @@ const SystemAdmins = () => {
                                             <td className="px-4 py-3 text-right">
                                                 <button
                                                     onClick={() => assignRole(user.uid, selectedRole[user.uid] || user.role || 'customer')}
-                                                    disabled={(selectedRole[user.uid] || user.role || 'customer') === (user.role || 'customer')}
+                                                    disabled={(selectedRole[user.uid] || user.role || 'customer') === (user.role || 'customer') || user.uid === currentUser?.uid}
+                                                    title={user.uid === currentUser?.uid ? "You cannot change your own role" : ""}
                                                     className="px-3 py-1.5 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-200 disabled:text-gray-400 text-white text-xs font-bold rounded-lg transition-colors disabled:cursor-not-allowed"
                                                 >
                                                     Update
