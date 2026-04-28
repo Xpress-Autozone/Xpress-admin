@@ -197,9 +197,11 @@ const SystemAdmins = () => {
                                                     className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none"
                                                 >
                                                     <option value="customer">⚪ Customer</option>
-                                                    {assignableRoles.includes('vendor') && <option value="vendor">🟠 Vendor</option>}
-                                                    {assignableRoles.includes('moderator') && <option value="moderator">🔵 Moderator</option>}
-                                                    {assignableRoles.includes('manager') && <option value="manager">🟣 Manager</option>}
+                                                    {assignableRoles.map(role => (
+                                                        <option key={role} value={role}>
+                                                            {ROLE_CONFIG[role]?.icon || '⚪'} {ROLE_CONFIG[role]?.label || role}
+                                                        </option>
+                                                    ))}
                                                     {/* Admins can also promote to admin */}
                                                     {currentRole === 'admin' && <option value="admin">🔴 Admin</option>}
                                                 </select>
