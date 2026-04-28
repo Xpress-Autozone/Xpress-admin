@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, setPage } from '../../orderSlice';
 import LoadingSpinner from '../../Components/LoadingSpinner';
 import OrderDetailModal from './OrderDetailModal';
+import { API_BASE_URL } from '../../config/api';
 
 const Orders = () => {
   const dispatch = useDispatch();
@@ -331,6 +332,7 @@ const Orders = () => {
         </div>
       )}
     </div>
-);
+  );
+};
 
 export default Orders;
