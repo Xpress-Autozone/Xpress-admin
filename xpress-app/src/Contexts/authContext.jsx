@@ -56,30 +56,46 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
+    let refreshInterval;
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try {
-          // Force refresh token to get latest claims
-          const tokenResult = await user.getIdTokenResult(true);
-          const role = tokenResult.claims.role || "user";
+        const syncToken = async () => {
+          try {
+            const tokenResult = await user.getIdTokenResult(true);
+            const role = tokenResult.claims.role || "user";
 
-          dispatch(setCredentials({
-            user: {
-              uid: user.uid,
-              email: user.email,
-              role: role
-            },
-            token: tokenResult.token
-          }));
-        } catch (error) {
-          console.error("[AuthContext] Error syncing with Redux:", error);
-        }
+            dispatch(setCredentials({
+              user: {
+                uid: user.uid,
+                email: user.email,
+                role: role
+              },
+              token: tokenResult.token
+            }));
+            console.log("[AuthContext] Token refreshed successfully");
+          } catch (error) {
+            console.error("[AuthContext] Error refreshing token:", error);
+          }
+        };
+
+        await syncToken();
+
+        // Refresh token every 45 minutes (Firebase tokens expire in 60m)
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(syncToken, 45 * 60 * 1000);
+      } else {
+        if (refreshInterval) clearInterval(refreshInterval);
+        setCurrentUser(null);
       }
       setCurrentUser(user);
       setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      if (refreshInterval) clearInterval(refreshInterval);
+    };
   }, [dispatch]);
 
   const value = {

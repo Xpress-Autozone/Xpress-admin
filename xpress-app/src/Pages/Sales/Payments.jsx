@@ -168,8 +168,8 @@ const Payments = () => {
         const doc = new jsPDF();
         const dateStr = formatDate(transaction.createdAt);
         
-        // Add Logo
-        doc.addImage(logo, 'PNG', 15, 10, 40, 25);
+        // Add Logo (width 40, auto height)
+        doc.addImage(logo, 'PNG', 15, 10, 40, 0);
         
         // Header Info
         doc.setFontSize(22);
