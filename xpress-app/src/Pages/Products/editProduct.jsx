@@ -698,19 +698,21 @@ const EditProduct = () => {
                                     Display Settings (Xplore Page)
                                 </h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                        <span className="text-sm font-medium text-gray-700">Featured</span>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                name="featured"
-                                                checked={formData.featured}
-                                                onChange={handleInputChange}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
-                                        </label>
-                                    </div>
+                                    {user?.role !== 'vendor' && (
+                                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                            <span className="text-sm font-medium text-gray-700">Featured</span>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    name="featured"
+                                                    checked={formData.featured}
+                                                    onChange={handleInputChange}
+                                                    className="sr-only peer"
+                                                />
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
+                                            </label>
+                                        </div>
+                                    )}
 
                                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
                                         <span className="text-sm font-medium text-gray-700">New Arrival</span>
@@ -718,41 +720,46 @@ const EditProduct = () => {
                                             <input
                                                 type="checkbox"
                                                 name="newProduct"
-                                                checked={formData.newProduct}
+                                                checked={user?.role === 'vendor' ? true : formData.newProduct}
                                                 onChange={handleInputChange}
+                                                disabled={user?.role === 'vendor'}
                                                 className="sr-only peer"
                                             />
                                             <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
                                         </label>
                                     </div>
 
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                        <span className="text-sm font-medium text-gray-700">Hot Product</span>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                name="hotProduct"
-                                                checked={formData.hotProduct}
-                                                onChange={handleInputChange}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
-                                        </label>
-                                    </div>
+                                    {user?.role !== 'vendor' && (
+                                        <>
+                                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                                <span className="text-sm font-medium text-gray-700">Hot Product</span>
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="hotProduct"
+                                                        checked={formData.hotProduct}
+                                                        onChange={handleInputChange}
+                                                        className="sr-only peer"
+                                                    />
+                                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
+                                                </label>
+                                            </div>
 
-                                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                        <span className="text-sm font-medium text-gray-700">Show on Home</span>
-                                        <label className="relative inline-flex items-center cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                name="showOnHome"
-                                                checked={formData.showOnHome}
-                                                onChange={handleInputChange}
-                                                className="sr-only peer"
-                                            />
-                                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
-                                        </label>
-                                    </div>
+                                            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                                <span className="text-sm font-medium text-gray-700">Show on Home</span>
+                                                <label className="relative inline-flex items-center cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="showOnHome"
+                                                        checked={formData.showOnHome}
+                                                        onChange={handleInputChange}
+                                                        className="sr-only peer"
+                                                    />
+                                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
+                                                </label>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
