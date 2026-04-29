@@ -240,18 +240,18 @@ const ProfileModal = ({ isOpen, onClose, currentUser, token }) => {
           <div className="mt-8 flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-white border border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-bold rounded-full hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={isSaving || isUploading || success}
-              className="flex-[2] px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-white font-bold rounded-xl shadow-lg shadow-yellow-200 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-[2] px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-white text-sm font-bold rounded-full shadow-lg shadow-yellow-200/50 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Loader2 className="w-3 h-3 animate-spin" />
                   Saving...
                 </>
               ) : (

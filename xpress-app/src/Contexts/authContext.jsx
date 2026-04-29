@@ -7,7 +7,9 @@ import {
   onAuthStateChanged,
   sendPasswordResetEmail,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useNavigate } from 'react-router-dom';
@@ -36,11 +38,22 @@ export function AuthProvider({ children }) {
   const resetPassword = (email) => sendPasswordResetEmail(auth, email);
 
   const signInWithGoogle = async () => {
-
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
+    if (isMobile) {
+      return signInWithRedirect(auth, provider);
+    } else {
+      return signInWithPopup(auth, provider);
+    }
   };
+
+  useEffect(() => {
+    // Handle redirect result for mobile
+    getRedirectResult(auth).catch((error) => {
+      console.error("Error getting redirect result:", error);
+    });
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
