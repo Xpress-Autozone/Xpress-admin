@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Package, User, MapPin, Truck, CheckCircle, MessageSquare, CreditCard, Loader2, Trash2, AlertCircle } from 'lucide-react';
+import { X, Package, User, MapPin, Truck, CheckCircle, MessageSquare, CreditCard, Loader2, Trash2, AlertCircle, Copy, ExternalLink, Navigation, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { API_BASE_URL } from '../../config/api';
@@ -31,6 +31,7 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
   const [statusSuccess, setStatusSuccess] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !order) return null;
 
@@ -87,6 +88,18 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
     if (!order.whatsapp) return;
     const msg = `Hello, this is Xpress Autozone regarding your order ${order.id}. We are ready to arrange your delivery!`;
     window.open(`https://wa.me/${order.whatsapp.replace('+', '')}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
+  const handleCopyAddress = () => {
+    if (!order.address) return;
+    navigator.clipboard.writeText(order.address);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleOpenMaps = () => {
+    if (!order.address) return;
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(order.address)}`, '_blank');
   };
 
   // ── Derived Data ─────────────────────────────────────────────────────────────
@@ -236,11 +249,33 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
 
               {/* Address */}
               <div>
-                <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gray-400" /> Delivery Address
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-gray-400" /> Delivery Address
+                  </h3>
+                  {order.address && (
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={handleCopyAddress}
+                        className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-black transition-all flex items-center gap-1.5"
+                        title="Copy Address"
+                      >
+                        {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span className="text-[9px] font-black uppercase">{copied ? 'Copied' : 'Copy'}</span>
+                      </button>
+                      <button 
+                        onClick={handleOpenMaps}
+                        className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg transition-all flex items-center gap-1.5 shadow-sm border border-blue-100"
+                        title="Open in Google Maps"
+                      >
+                        <Navigation className="w-3.5 h-3.5" />
+                        <span className="text-[9px] font-black uppercase">Maps</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div className="p-4 rounded-xl border border-gray-100 bg-white">
-                  <p className="text-sm text-gray-700 leading-relaxed">{order.address || 'Address pending confirmation'}</p>
+                  <p className="text-sm text-gray-700 leading-relaxed font-medium">{order.address || 'Address pending confirmation'}</p>
                 </div>
               </div>
 
