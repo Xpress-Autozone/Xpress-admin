@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
+import { setNotificationDot as setCustomerDot, markCustomersAsSeen } from '../../customerSlice';
 import {
   LayoutDashboard,
   Settings,
@@ -27,9 +30,24 @@ import { hasPermission } from '../../config/roles';
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
-  const { notificationDot } = useSelector((state) => state.orders);
+  const { notificationDot: orderDot } = useSelector((state) => state.orders);
+  const { notificationDot: customerDot } = useSelector((state) => state.customers);
   const role = user?.role || 'customer';
+
+  // Listen for Customer Notifications
+  useEffect(() => {
+    if (!hasPermission(role, 'manage_customers')) return;
+
+    const unsub = onSnapshot(doc(db, "admin_notifications", "customers"), (doc) => {
+      if (doc.exists() && doc.data().hasNew) {
+        dispatch(setCustomerDot(true));
+      }
+    });
+
+    return () => unsub();
+  }, [role, dispatch]);
 
   const insightsMenu = [
     {
@@ -88,7 +106,17 @@ const Sidebar = () => {
   const filterByPermission = (items) =>
     items.filter(item => !item.permission || hasPermission(role, item.permission));
 
-  const handleNavigation = (path) => {
+  const handleNavigation = async (path) => {
+    if (path === '/customers' && customerDot) {
+      dispatch(markCustomersAsSeen());
+      try {
+        await updateDoc(doc(db, "admin_notifications", "customers"), {
+          hasNew: false
+        });
+      } catch (err) {
+        console.error("Failed to clear customer notification:", err);
+      }
+    }
     navigate(path);
   };
 
@@ -97,10 +125,6 @@ const Sidebar = () => {
     const searchParams = new URLSearchParams(location.search);
     const categoryQuery = searchParams.get('category');
     
-    // Improved active state logic:
-    // 1. If it's a category link: match based on the slug and 'category' query param
-    // 2. If it's 'Total Inventory' (/products): only highlight if NO category is selected
-    // 3. Otherwise: match pathname exactly
     let isActive = false;
     if (item.slug) {
         isActive = location.pathname === '/products' && categoryQuery === item.slug;
@@ -125,8 +149,11 @@ const Sidebar = () => {
                 }`}
             />
             <span className="text-sm">{item.label}</span>
-            {item.path === '/orders' && notificationDot && (
-              <span className={`w-2 h-2 rounded-full border border-white shadow-sm animate-pulse ${notificationDot === 'red' ? 'bg-red-500' : notificationDot === 'yellow' ? 'bg-yellow-500' : notificationDot === 'green' ? 'bg-green-500' : 'bg-blue-500'}`}></span>
+            {item.path === '/orders' && orderDot && (
+              <span className={`w-2 h-2 rounded-full border border-white shadow-sm animate-pulse ${orderDot === 'red' ? 'bg-red-500' : orderDot === 'yellow' ? 'bg-yellow-500' : orderDot === 'green' ? 'bg-green-500' : 'bg-blue-500'}`}></span>
+            )}
+            {item.path === '/customers' && customerDot && (
+              <span className="w-2 h-2 rounded-full bg-green-500 border border-white shadow-sm animate-pulse"></span>
             )}
           </div>
           {isActive && <ChevronRight className="w-4 h-4 text-yellow-500" />}

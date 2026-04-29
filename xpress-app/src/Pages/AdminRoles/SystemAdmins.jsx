@@ -202,7 +202,6 @@ const SystemAdmins = () => {
                                                     disabled={user.uid === currentUser?.uid}
                                                     className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    <option value="customer">⚪ Customer</option>
                                                     {assignableRoles.map(role => (
                                                         <option key={role} value={role}>
                                                             {ROLE_CONFIG[role]?.icon || '⚪'} {ROLE_CONFIG[role]?.label || role}
