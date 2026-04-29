@@ -162,7 +162,8 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
                 <div className="flex items-center gap-1">
                   {FLOW_STEPS.map((s, i, arr) => {
                     const cfg = getStatusConfig(s);
-                    const isActive = order.status === s;
+                    const currentStatus = order.status?.toLowerCase();
+                    const isActive = currentStatus === s;
                     const isDone = !isCancelled && currentIdx > i;
                     return (
                       <React.Fragment key={s}>
@@ -284,10 +285,15 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
                 <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-2">
                   <Truck className="w-4 h-4 text-gray-400" /> Update Status
                 </h3>
-                <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-3">
+                <div className="p-4 rounded-xl border border-gray-100 bg-white relative">
+                  {isUpdating && (
+                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl">
+                      <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
+                    </div>
+                  )}
                   <select
-                    value={selectedStatus}
-                    onChange={e => setSelectedStatus(e.target.value)}
+                    value={order.status?.toLowerCase()}
+                    onChange={e => handleUpdateStatus(e.target.value)}
                     disabled={isUpdating}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
                   >
@@ -295,25 +301,13 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
                     {ORDER_STATUSES
                       .filter(s => !['pending','confirmed','shipped','delivered','processing'].includes(s.value))
                       .map(s => (
-                        <option key={s.value} value={s.value} disabled={s.value === order.status}>
-                          {s.emoji} {s.label}{s.value === order.status ? ' (current)' : ''}
+                        <option key={s.value} value={s.value} disabled={s.value === order.status?.toLowerCase()}>
+                          {s.emoji} {s.label}{s.value === order.status?.toLowerCase() ? ' (current)' : ''}
                         </option>
                       ))
                     }
                   </select>
-                  <button
-                    onClick={() => handleUpdateStatus(selectedStatus)}
-                    disabled={!selectedStatus || selectedStatus === order.status || isUpdating}
-                    className="w-full py-2.5 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-100 disabled:text-gray-400 text-white font-bold rounded-lg text-sm transition-colors flex items-center justify-center gap-2"
-                  >
-                    {isUpdating
-                      ? <><Loader2 className="w-4 h-4 animate-spin" /> Updating...</>
-                      : statusSuccess
-                        ? <><CheckCircle className="w-4 h-4" /> Updated!</>
-                        : <>Update Status</>
-                    }
-                  </button>
-                  {statusSuccess && <p className="text-xs text-green-600 font-bold text-center">✓ Status updated successfully</p>}
+                  {statusSuccess && <p className="text-[10px] text-green-600 font-bold text-center mt-2 animate-in fade-in zoom-in">✓ Status auto-saved</p>}
                 </div>
               </div>
             </div>
