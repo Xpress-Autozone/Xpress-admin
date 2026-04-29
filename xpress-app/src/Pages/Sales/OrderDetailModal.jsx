@@ -30,6 +30,7 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('MoMo');
   const [statusSuccess, setStatusSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -71,18 +72,23 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
     finally { setIsUpdating(false); setShowDeleteConfirm(false); }
   };
 
-  const handleUpdateStatus = async (newStatus) => {
-    if (!newStatus || newStatus === order.status) return;
+  const handleUpdateStatus = async (newStatus, paymentMethodOverride = null) => {
+    if (!newStatus) return;
     try {
       setIsUpdating(true);
       setStatusSuccess(false);
+      const payload = { 
+        orderStatus: newStatus,
+        paymentMethod: paymentMethodOverride || selectedPaymentMethod
+      };
+      
       const response = await fetch(`${API_BASE_URL}/updateOrderStatus/${order.docId || order.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { Authorization: `Bearer ${token}` }),
         },
-        body: JSON.stringify({ orderStatus: newStatus })
+        body: JSON.stringify(payload)
       });
       const result = await response.json();
       if (result.success) {
@@ -95,6 +101,10 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
       }
     } catch (e) { alert('An error occurred while updating order status.'); }
     finally { setIsUpdating(false); }
+  };
+
+  const handleMarkAsPaid = async () => {
+    await handleUpdateStatus(order.status || 'requested', selectedPaymentMethod);
   };
 
   const handleWhatsApp = () => {
@@ -292,34 +302,74 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
                 </div>
               </div>
 
-              {/* Update Status */}
-              <div>
-                <h3 className="text-sm font-bold text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-gray-400" /> Update Status
+              {/* Payment & Logistics */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-bold text-gray-900 mb-1 uppercase tracking-wider flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-gray-400" /> Payment & Status
                 </h3>
-                <div className="p-4 rounded-xl border border-gray-100 bg-white relative">
+                
+                <div className="p-4 rounded-xl border border-gray-100 bg-white space-y-4 relative">
                   {isUpdating && (
                     <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] z-10 flex items-center justify-center rounded-xl">
                       <Loader2 className="w-5 h-5 text-yellow-500 animate-spin" />
                     </div>
                   )}
-                  <select
-                    value={order.status?.toLowerCase()}
-                    onChange={e => handleUpdateStatus(e.target.value)}
-                    disabled={isUpdating}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
-                  >
-                    <option value="">— Select new status —</option>
-                    {ORDER_STATUSES
-                      .filter(s => !['pending','confirmed','shipped','delivered','processing'].includes(s.value))
-                      .map(s => (
-                        <option key={s.value} value={s.value} disabled={s.value === order.status?.toLowerCase()}>
-                          {s.emoji} {s.label}{s.value === order.status?.toLowerCase() ? ' (current)' : ''}
-                        </option>
-                      ))
-                    }
-                  </select>
-                  {statusSuccess && <p className="text-[10px] text-green-600 font-bold text-center mt-2 animate-in fade-in zoom-in">✓ Status auto-saved</p>}
+
+                  {/* Payment Received Toggle */}
+                  <div className="flex items-center justify-between pb-3 border-b border-gray-50">
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">Payment Received</p>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold">{order.paymentStatus === 'paid' ? 'Confirmed' : 'Pending'}</p>
+                    </div>
+                    {order.paymentStatus !== 'paid' ? (
+                      <div className="flex gap-2">
+                        <select 
+                          value={selectedPaymentMethod}
+                          onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                          className="text-[10px] font-bold border rounded px-2 py-1 bg-gray-50"
+                        >
+                          <option value="MoMo">MoMo</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                          <option value="Cash">Cash</option>
+                          <option value="Card">Card</option>
+                        </select>
+                        <button 
+                          onClick={handleMarkAsPaid}
+                          className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 text-black text-[10px] font-black uppercase rounded shadow-sm transition-all"
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 text-green-600">
+                        <CheckCircle className="w-4 h-4" />
+                        <span className="text-[10px] font-black uppercase">{order.paymentMethod || 'Paid'}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Order Status Select */}
+                  <div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Move To Step</p>
+                    <select
+                      value={order.status?.toLowerCase()}
+                      onChange={e => handleUpdateStatus(e.target.value)}
+                      disabled={isUpdating}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm font-bold bg-gray-50 focus:ring-2 focus:ring-yellow-400 outline-none disabled:opacity-50"
+                    >
+                      <option value="">— Select new status —</option>
+                      {ORDER_STATUSES
+                        .filter(s => !['pending','confirmed','shipped','delivered','processing'].includes(s.value))
+                        .map(s => (
+                          <option key={s.value} value={s.value} disabled={s.value === order.status?.toLowerCase()}>
+                            {s.emoji} {s.label}{s.value === order.status?.toLowerCase() ? ' (current)' : ''}
+                          </option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                  
+                  {statusSuccess && <p className="text-[10px] text-green-600 font-bold text-center mt-2 animate-in fade-in zoom-in">✓ Sync Complete</p>}
                 </div>
               </div>
             </div>
