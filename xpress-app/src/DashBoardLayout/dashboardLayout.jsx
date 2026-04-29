@@ -3,7 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import SideBar from '../Components/SideBar/siderBar';
 import Navbar from '../Components/NavBar/navBar';
 import ProtectedRoute from '../Components/ProtectedRoute/protectedRoute';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchOrders } from '../orderSlice';
 
 // Import all your page components
 import { useNotifications } from '../Contexts/NotificationContext';
@@ -27,10 +28,22 @@ const Customers = React.lazy(() => import('../Pages/Management/Customers/Custome
 import useFavicon from '../hooks/useFavicon';
 
 function DashboardLayout() {
-  const { hasNewInquiries } = useNotifications();
+  const dispatch = useDispatch();
+  const { notificationDot } = useSelector((state) => state.orders);
   
   // Update browser icon based on notification status
-  useFavicon(hasNewInquiries);
+  useFavicon(notificationDot);
+
+  // Fetch orders and poll every minute
+  React.useEffect(() => {
+    dispatch(fetchOrders({ page: 1, limit: 10 }));
+    
+    const interval = setInterval(() => {
+      dispatch(fetchOrders({ page: 1, limit: 10 }));
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [dispatch]);
 
   const { user } = useSelector((state) => state.auth);
   const isVendor = user?.role === 'vendor';

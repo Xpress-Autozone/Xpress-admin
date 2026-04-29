@@ -28,6 +28,7 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useSelector((state) => state.auth);
+  const { notificationDot } = useSelector((state) => state.orders);
   const role = user?.role || 'customer';
 
   const insightsMenu = [
@@ -124,6 +125,9 @@ const Sidebar = () => {
                 }`}
             />
             <span className="text-sm">{item.label}</span>
+            {item.path === '/orders' && notificationDot && (
+              <span className={`w-2 h-2 rounded-full border border-white shadow-sm animate-pulse ${notificationDot === 'red' ? 'bg-red-500' : notificationDot === 'yellow' ? 'bg-yellow-500' : notificationDot === 'green' ? 'bg-green-500' : 'bg-blue-500'}`}></span>
+            )}
           </div>
           {isActive && <ChevronRight className="w-4 h-4 text-yellow-500" />}
         </button>

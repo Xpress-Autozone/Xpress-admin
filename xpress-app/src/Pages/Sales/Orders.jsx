@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ShoppingCart, Search, Filter, MessageSquare, Clock, CheckCircle2, Truck, ExternalLink, Package, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchOrders, setPage } from '../../orderSlice';
+import { fetchOrders, setPage, markOrdersAsSeen } from '../../orderSlice';
 import LoadingSpinner from '../../Components/LoadingSpinner';
 import OrderDetailModal from './OrderDetailModal';
 import { API_BASE_URL } from '../../config/api';
@@ -24,6 +24,12 @@ const Orders = () => {
       dispatch(fetchOrders({ page: pagination.page }));
     }
   }, [pagination.page, token, dispatch]);
+
+  useEffect(() => {
+    if (status === 'succeeded' && rawOrders.length > 0) {
+      dispatch(markOrdersAsSeen());
+    }
+  }, [status, rawOrders, dispatch]);
 
   const handleRefresh = () => {
     dispatch(fetchOrders({ page: pagination.page }));

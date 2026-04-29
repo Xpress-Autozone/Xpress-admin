@@ -27,12 +27,23 @@ const orderSlice = createSlice({
     pagination: { page: 1, hasMore: false, total: 0 },
     status: "idle",
     error: null,
-    lastFetched: null
+    lastFetched: null,
+    notificationDot: null
   },
   reducers: {
     setPage: (state, action) => {
       state.pagination.page = action.payload;
-    }
+    },
+    markOrdersAsSeen: (state) => {
+      state.notificationDot = null;
+      if (state.items.length > 0) {
+        const orderStatuses = state.items.reduce((acc, order) => {
+          acc[order.id] = order.orderStatus || order.status;
+          return acc;
+        }, {});
+        localStorage.setItem('admin_last_seen_statuses', JSON.stringify(orderStatuses));
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -41,13 +52,48 @@ const orderSlice = createSlice({
       })
       .addCase(fetchOrders.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.items = action.payload.data || [];
+        const newOrders = action.payload.data || [];
+        state.items = newOrders;
         state.pagination = {
           page: action.payload.pagination?.currentPage || state.pagination.page,
           hasMore: action.payload.pagination?.hasMore || false,
           total: action.payload.pagination?.totalItems || state.items.length,
         };
         state.lastFetched = Date.now();
+
+        // Calculate notification dot
+        const lastSeenStatuses = JSON.parse(localStorage.getItem('admin_last_seen_statuses') || '{}');
+        let highestPriorityColor = null;
+
+        const priority = { 'red': 4, 'yellow': 3, 'blue': 2, 'green': 1 };
+        const statusColors = {
+          'requested': 'red',
+          'pending': 'red',
+          'payment_made': 'yellow',
+          'confirmed': 'yellow',
+          'dispatched': 'blue',
+          'shipped': 'blue',
+          'received': 'green',
+          'delivered': 'green',
+          'completed': 'green'
+        };
+
+        newOrders.forEach(order => {
+          const currentStatus = (order.orderStatus || order.status || 'pending').toLowerCase();
+          const lastStatus = lastSeenStatuses[order.id];
+
+          if (currentStatus !== lastStatus) {
+            const color = statusColors[currentStatus] || 'red';
+            if (!highestPriorityColor || priority[color] > priority[highestPriorityColor]) {
+              highestPriorityColor = color;
+            }
+          }
+        });
+
+        if (highestPriorityColor) {
+          state.notificationDot = highestPriorityColor;
+          // TODO: Implement email notifications for admins here
+        }
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.status = "failed";
@@ -56,5 +102,5 @@ const orderSlice = createSlice({
   },
 });
 
-export const { setPage } = orderSlice.actions;
+export const { setPage, markOrdersAsSeen } = orderSlice.actions;
 export default orderSlice.reducer;
