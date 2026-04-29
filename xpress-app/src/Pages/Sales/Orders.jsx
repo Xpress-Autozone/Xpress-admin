@@ -68,26 +68,31 @@ const Orders = () => {
     return (rawOrders || []).map(order => {
       // VENDOR SCOPING
       const itemsToDisplay = user?.role === 'vendor' 
-        ? (order.items || []).filter(item => item.vendorId === user.uid)
-        : (order.items || []);
+        ? (Array.isArray(order.items) ? order.items : []).filter(item => item.vendorId === user.uid)
+        : (Array.isArray(order.items) ? order.items : []);
 
       const totalDisplay = user?.role === 'vendor'
-        ? itemsToDisplay.reduce((sum, item) => sum + (Number(item.price) * (item.quantity || 1)), 0)
+        ? itemsToDisplay.reduce((sum, item) => sum + (Number(item.price || 0) * (item.quantity || 1)), 0)
         : (Number(order.total) || 0);
+
+      // Robust items string
+      const itemsString = itemsToDisplay.length > 0
+        ? itemsToDisplay.map(i => `${i.productName || i.name || i.itemName || 'Part'} (x${i.quantity || 1})`).join(', ')
+        : (typeof order.items === 'string' ? order.items : 'N/A');
 
       return {
         id: order.orderNumber || order.id,
         docId: order.id,
-        customer: order.customerName || order.customer?.name || 'Unknown',
-        items: itemsToDisplay.map(i => `${i.productName || i.name || i.itemName || 'Unknown Item'} (x${i.quantity || 1})`).join(', ') || 'N/A',
+        customer: order.customerName || order.customer?.name || order.customer?.displayName || 'Unknown',
+        items: itemsString,
         total: `GHC ${totalDisplay.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
         totalRaw: totalDisplay,
         status: order.orderStatus || order.status || 'pending',
         paymentStatus: order.paymentStatus || 'pending',
         paymentMethod: order.paymentMethod || 'N/A',
         date: formatDate(order.createdAt),
-        whatsapp: order.customerPhone || order.customer?.phone || '',
-        address: order.deliveryAddress || order.address || '',
+        whatsapp: order.customerPhone || order.customer?.phone || order.customer?.phoneNumber || '',
+        address: order.deliveryAddress || order.address || order.customer?.address || '',
         rawItems: itemsToDisplay,
       };
     });
@@ -128,6 +133,16 @@ const Orders = () => {
     const message = `Hello, this is Xpress Autozone regarding your order ${orderId}. We are ready to arrange your delivery!`;
     window.open(`https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(message)}`, '_blank');
   };
+
+  // Keep selectedOrder in sync with the orders list (e.g. after a status update refresh)
+  useEffect(() => {
+    if (isModalOpen && selectedOrder && orders.length > 0) {
+      const updated = orders.find(o => (o.docId || o.id) === (selectedOrder.docId || selectedOrder.id));
+      if (updated && JSON.stringify(updated) !== JSON.stringify(selectedOrder)) {
+        setSelectedOrder(updated);
+      }
+    }
+  }, [orders, selectedOrder, isModalOpen]);
 
   const filteredOrders = orders.filter(order =>
     order.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||

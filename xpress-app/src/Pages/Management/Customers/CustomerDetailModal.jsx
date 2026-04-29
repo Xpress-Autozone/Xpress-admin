@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, MapPin, Mail, Phone, Calendar, ShoppingBag, Edit, ShieldAlert, MessageSquare, Save, Car, Loader2 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import { formatDisplayId } from '../../../utils/idGenerator';
+import { API_BASE_URL } from '../../../config/api';
 
 const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdating }) => {
+  const { token } = useSelector((state) => state.auth);
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [tags, setTags] = useState([]);
 
   useEffect(() => {
     if (customer && isOpen) {
@@ -68,7 +72,7 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdati
             </div>
             <div className="text-left">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                {customer.displayName || 'Unnamed User'}
+                {customer.name || customer.displayName || 'Unnamed User'}
                 {tags?.map(tag => (
                    <span key={tag} className="text-[10px] font-bold px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full border border-yellow-200 uppercase">
                      {tag}

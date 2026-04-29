@@ -73,9 +73,9 @@ const Customers = () => {
         const headers = ["UID", "Name", "Email", "Phone", "Orders", "Last Order", "Tags", "Joined"];
         const rows = customers.map(c => [
             c.uid,
-            c.displayName || "N/A",
+            c.name || c.displayName || "N/A",
             c.email,
-            c.phoneNumber || "N/A",
+            c.phone || c.phoneNumber || "N/A",
             c.orderCount || 0,
             c.lastOrderDate || "N/A",
             (c.tags || []).join(", "),
@@ -166,7 +166,7 @@ const Customers = () => {
                                                     {(customer.displayName || customer.email || 'U').charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
-                                                    <div className="text-sm font-semibold text-gray-900">{customer.displayName || 'Unnamed User'}</div>
+                                                    <div className="text-sm font-semibold text-gray-900">{customer.name || customer.displayName || 'Unnamed User'}</div>
                                                     <div className="text-[10px] text-gray-400 font-mono mb-1">{formatDisplayId(customer.uid, 'customer')}</div>
                                                     <div className="text-xs text-gray-500 font-medium flex items-center gap-1">
                                                         <Mail className="w-3 h-3" /> {customer.email}

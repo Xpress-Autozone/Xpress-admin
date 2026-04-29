@@ -36,8 +36,21 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
   if (!isOpen || !order) return null;
 
   const currentStatusConfig = getStatusConfig(order.status);
-  const currentIdx = FLOW_STEPS.indexOf(order.status?.toLowerCase());
-  const isCancelled = order.status?.toLowerCase() === 'cancelled';
+  const normalizedStatus = order.status?.toLowerCase();
+  
+  // Map legacy/internal statuses to the flow steps for the UI
+  const getEffectiveFlowStatus = (status) => {
+    if (!status) return 'requested';
+    if (['pending', 'confirmed', 'requested'].includes(status)) return 'requested';
+    if (['payment_made', 'paid'].includes(status)) return 'payment_made';
+    if (['dispatched', 'shipped', 'out for delivery'].includes(status)) return 'dispatched';
+    if (['received', 'delivered', 'completed'].includes(status)) return 'received';
+    return status;
+  };
+
+  const effectiveStatus = getEffectiveFlowStatus(normalizedStatus);
+  const currentIdx = FLOW_STEPS.indexOf(effectiveStatus);
+  const isCancelled = normalizedStatus === 'cancelled';
 
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleDeleteOrder = async () => {
@@ -108,8 +121,8 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
         name: item.productName || item.name || item.itemName || 'Auto Part',
         qty: item.quantity || 1,
         image: item.image || null,
-        price: `GHC ${(Number(item.price) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
-        unitPrice: `GHC ${Number(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        price: `GHC ${(Number(item.price || 0) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        unitPrice: `GHC ${Number(item.price || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
       }))
     : [{ name: order.items || 'Order Item', qty: 1, image: null, price: order.total, unitPrice: order.total }];
 
@@ -162,8 +175,7 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
                 <div className="flex items-center gap-1">
                   {FLOW_STEPS.map((s, i, arr) => {
                     const cfg = getStatusConfig(s);
-                    const currentStatus = order.status?.toLowerCase();
-                    const isActive = currentStatus === s;
+                    const isActive = effectiveStatus === s;
                     const isDone = !isCancelled && currentIdx > i;
                     return (
                       <React.Fragment key={s}>
