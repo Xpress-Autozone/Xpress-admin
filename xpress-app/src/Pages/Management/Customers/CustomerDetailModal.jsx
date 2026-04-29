@@ -1,15 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, MapPin, Mail, Phone, Calendar, ShoppingBag, Edit, ShieldAlert, MessageSquare, Save, Car } from 'lucide-react';
+import { X, User, MapPin, Mail, Phone, Calendar, ShoppingBag, Edit, ShieldAlert, MessageSquare, Save, Car, Loader2 } from 'lucide-react';
 import { formatDisplayId } from '../../../utils/idGenerator';
 
 const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdating }) => {
-  const [tags, setTags] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   useEffect(() => {
-    if (customer) {
+    if (customer && isOpen) {
       setTags(customer.tags || []);
+      fetchCustomerOrders();
     }
-  }, [customer]);
+  }, [customer, isOpen]);
+
+  const fetchCustomerOrders = async () => {
+    if (!customer?.uid) return;
+    try {
+      setOrdersLoading(true);
+      const response = await fetch(`${API_BASE_URL}/getOrders?customerId=${customer.uid}`, {
+        headers: {
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setOrders(data.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching customer orders:", err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
 
   const handleAddTag = async (e) => {
     if (e.key === 'Enter' && e.target.value.trim() !== '') {
@@ -31,15 +53,6 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdati
   };
 
   if (!isOpen || !customer) return null;
-
-  // Real orders are now fetched and passed in the customer object from the backend
-  const orders = customer.orders || [];
-  
-  // Some dummy orders for visualization if real ones are empty but count is > 0
-  const dummyOrders = [
-    { id: 'ORD-100234', status: 'Delivered', date: 'Oct 12, 2025', total: 'GH₵450.00' },
-    { id: 'ORD-100192', status: 'Processing', date: 'Nov 05, 2025', total: 'GH₵125.50' }
-  ];
 
   const vehicle = customer.vehicle || {};
 
@@ -187,27 +200,37 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdati
                  <span className="text-xs font-semibold text-gray-400">{customer.orderCount || 0} Total Orders</span>
                </h3>
                
-               {customer.orderCount > 0 ? (
-                 <div className="space-y-3">
-                    {/* In a real scenario, we'd map customer.orders, using dummy if empty for demo */}
-                   {(customer.orders?.length > 0 ? customer.orders : dummyOrders).map(order => (
-                     <div key={order.id} className="p-3 border border-gray-100 rounded-xl hover:border-yellow-300 transition-colors bg-white">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-bold text-gray-900 font-mono">{order.orderNumber || order.id}</span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${order.status === 'Delivered' || order.orderStatus === 'delivered' ? 'text-green-700 bg-green-50' : 'text-yellow-700 bg-yellow-50'}`}>
-                            {order.orderStatus || order.status}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-500">{order.date || (order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '')}</span>
-                          <span className="text-sm font-bold text-gray-900">{order.total}</span>
-                        </div>
-                     </div>
-                   ))}
-                   <button className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 text-center border border-dashed border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
-                     View All Orders
-                   </button>
+               {ordersLoading ? (
+                 <div className="py-8 text-center">
+                    <Loader2 className="w-6 h-6 text-yellow-500 animate-spin mx-auto mb-2" />
+                    <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Loading history...</p>
                  </div>
+               ) : orders.length > 0 ? (
+                 <div className="space-y-3">
+                    {orders.map(order => (
+                      <div key={order.id} className="p-3 border border-gray-100 rounded-xl hover:border-yellow-300 transition-colors bg-white">
+                         <div className="flex justify-between items-center mb-2">
+                           <span className="text-xs font-bold text-gray-900 font-mono">{order.orderNumber || order.id}</span>
+                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${['delivered', 'received'].includes(order.orderStatus?.toLowerCase()) ? 'text-green-700 bg-green-50' : 'text-yellow-700 bg-yellow-50'}`}>
+                             {order.orderStatus || 'Pending'}
+                           </span>
+                         </div>
+                         <div className="flex justify-between items-center">
+                           <span className="text-xs text-gray-500">
+                             {order.createdAt?._seconds 
+                               ? new Date(order.createdAt._seconds * 1000).toLocaleDateString() 
+                               : order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
+                           </span>
+                           <span className="text-sm font-bold text-gray-900">GH₵{Number(order.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                         </div>
+                      </div>
+                    ))}
+                    {orders.length >= 10 && (
+                      <button className="w-full py-2 text-xs font-bold text-gray-500 hover:text-gray-900 text-center border border-dashed border-gray-200 rounded-lg hover:border-gray-400 transition-colors">
+                        View All Orders
+                      </button>
+                    )}
+                  </div>
                ) : (
                  <div className="p-8 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50">
                     <ShoppingBag className="w-8 h-8 text-gray-300 mx-auto mb-2" />
