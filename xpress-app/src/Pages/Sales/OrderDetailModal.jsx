@@ -92,7 +92,7 @@ const OrderDetailModal = ({ order, isOpen, onClose, onUpdate }) => {
   // ── Derived Data ─────────────────────────────────────────────────────────────
   const orderItems = order.rawItems?.length > 0
     ? order.rawItems.map(item => ({
-        name: item.name || item.itemName || 'Auto Part',
+        name: item.productName || item.name || item.itemName || 'Auto Part',
         qty: item.quantity || 1,
         image: item.image || null,
         price: `GHC ${(Number(item.price) * (item.quantity || 1)).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,

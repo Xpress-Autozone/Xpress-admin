@@ -79,7 +79,7 @@ const Orders = () => {
         id: order.orderNumber || order.id,
         docId: order.id,
         customer: order.customerName || order.customer?.name || 'Unknown',
-        items: itemsToDisplay.map(i => `${i.name || i.itemName} (x${i.quantity || 1})`).join(', ') || 'N/A',
+        items: itemsToDisplay.map(i => `${i.productName || i.name || i.itemName || 'Unknown Item'} (x${i.quantity || 1})`).join(', ') || 'N/A',
         total: `GHC ${totalDisplay.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
         totalRaw: totalDisplay,
         status: order.orderStatus || order.status || 'pending',
