@@ -22,7 +22,7 @@ const Payments = () => {
     };
 
     const { user, token } = useSelector((state) => state.auth);
-    const [searchTerm, setSearchTerm] = useState('');
+
     const [loading, setLoading] = useState(true);
     const [ledger, setLedger] = useState([]);
     const [pendingOrders, setPendingOrders] = useState([]);

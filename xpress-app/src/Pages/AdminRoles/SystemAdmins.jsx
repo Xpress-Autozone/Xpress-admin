@@ -10,7 +10,7 @@ import { formatDisplayId } from "../../utils/idGenerator";
 import AdminHistoryModal from "./AdminHistoryModal";
 
 const SystemAdmins = () => {
-    const navigate = useNavigate();
+
     const { token, user: currentUser } = useSelector((state) => state.auth);
     const currentRole = currentUser?.role || 'customer';
     const canManageRoles = hasPermission(currentRole, 'manage_roles');

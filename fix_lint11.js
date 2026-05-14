@@ -1,4 +1,7 @@
-/** @type {import('tailwindcss').Config} */
+const fs = require('fs');
+
+let file = 'xpress-app/tailwind.config.js';
+let content = `/** @type {import('tailwindcss').Config} */
 import formsPlugin from '@tailwindcss/forms';
 import typographyPlugin from '@tailwindcss/typography';
 
@@ -33,4 +36,5 @@ export default {
     formsPlugin,
     typographyPlugin,
   ],
-}
+}`;
+fs.writeFileSync(file, content);

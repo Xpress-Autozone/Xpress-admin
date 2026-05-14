@@ -44,7 +44,7 @@ export function NetworkStatusProvider({ children }) {
           return true;
         }
         throw new Error("Unreachable");
-      } catch (err) {
+      } catch (_e) {
         if (count > 1) {
           // Wait 2s before retrying
           await new Promise(r => setTimeout(r, 2000));

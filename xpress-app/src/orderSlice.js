@@ -92,7 +92,7 @@ const orderSlice = createSlice({
 
         if (highestPriorityColor) {
           state.notificationDot = highestPriorityColor;
-          // TODO: Implement email notifications for admins here
+
         }
       })
       .addCase(fetchOrders.rejected, (state, action) => {

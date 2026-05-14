@@ -14,7 +14,7 @@ const AllProducts = () => {
     const categoryFilter = searchParams.get("category");
     const { items, status, error } = useSelector((state) => state.products);
     const { vendors } = useVendors();
-    const [refreshKey, setRefreshKey] = useState(0);
+
 
     const enrichedItems = useMemo(() => {
         return items.map(item => {

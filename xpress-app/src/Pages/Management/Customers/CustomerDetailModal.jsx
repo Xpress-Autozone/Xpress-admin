@@ -191,7 +191,7 @@ const CustomerDetailModal = ({ customer, isOpen, onClose, onUpdateTags, isUpdati
                      <ShieldAlert className="w-4 h-4 text-red-500" /> Reset Password
                    </button>
                    <button className="text-xs font-bold text-gray-700 hover:text-black flex items-center gap-2 p-2 hover:bg-white rounded transition-all">
-                     <ShieldAlert className="w-4 h-4 text-red-500" /> Reset Password
+                     <ShieldAlert className="w-4 h-4 text-red-500" /> Block User
                    </button>
                 </div>
               </div>

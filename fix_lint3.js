@@ -1,0 +1,31 @@
+const fs = require('fs');
+
+function fixEslint() {
+  const issues = [
+    { file: 'xpress-app/src/Components/NetworkStatus/NetworkStatusBanner.jsx', search: /const \{ isFullyConnected \} = useNetworkStatus\(\);/, replace: '' },
+    { file: 'xpress-app/src/Components/NetworkStatus/OfflinePage.jsx', search: /import React, \{ useEffect \} from 'react';/, replace: "import React from 'react';" },
+    { file: 'xpress-app/src/Components/NetworkStatus/OfflinePage.jsx', search: /const \{ isServerDown \} = useNetworkStatus\(\);/, replace: '' },
+    { file: 'xpress-app/src/Contexts/NetworkStatusContext.jsx', search: /} catch \(e\) {/, replace: '} catch (error) {' },
+    { file: 'xpress-app/src/Pages/AdminRoles/SystemAdmins.jsx', search: /import \{ useNavigate \} from 'react-router-dom';/, replace: '' },
+    { file: 'xpress-app/src/Pages/AdminRoles/SystemAdmins.jsx', search: /const navigate = useNavigate\(\);/, replace: '' },
+    { file: 'xpress-app/src/Pages/Dashboard/OverView/Overview.jsx', search: /\{\[...Array\(3\)\].map\(\(\_, i\) => \(/g, replace: '{[...Array(3)].map((_, i) => (' },
+    { file: 'xpress-app/src/Pages/Dashboard/OverView/Overview.jsx', search: /\{\[...Array\(5\)\].map\(\(\_, i\) => \(/g, replace: '{[...Array(5)].map((_, i) => (' },
+    { file: 'xpress-app/src/Pages/Products/AllProducts.jsx', search: /import React, \{ useState, useEffect \} from 'react';/, replace: "import React, { useEffect } from 'react';" },
+    { file: 'xpress-app/src/Pages/Products/editProduct.jsx', search: /const \{ token \} = useSelector\(\(state\) => state\.auth\);/, replace: '' },
+    { file: 'xpress-app/src/Pages/Products/editProduct.jsx', search: /const \{ items \} = useSelector\(\(state\) => state\.vendors\);/, replace: '' },
+    { file: 'xpress-app/src/Pages/Products/product.jsx', search: /const vendorId = formData\.get\('vendorId'\);/, replace: '' },
+    { file: 'xpress-app/src/Pages/Sales/OrderDetailModal.jsx', search: /const \[selectedStatus, setSelectedStatus\] = useState\(order\?\.orderStatus \|\| order\?\.status \|\| 'pending'\);/, replace: '' },
+    { file: 'xpress-app/src/Pages/Sales/OrderDetailModal.jsx', search: /\.catch\(e => console\.error\("Error closing modal", e\)\);/, replace: '.catch(() => console.error("Error closing modal"));' },
+    { file: 'xpress-app/src/Pages/Sales/Orders.jsx', search: /const shouldFetch = status === 'idle' \|\| \(lastFetched && Date\.now\(\) - lastFetched > 5 \* 60 \* 1000\);/, replace: '' },
+  ];
+
+  for (const issue of issues) {
+    if (fs.existsSync(issue.file)) {
+      let content = fs.readFileSync(issue.file, 'utf8');
+      content = content.replace(issue.search, issue.replace);
+      fs.writeFileSync(issue.file, content);
+    }
+  }
+}
+
+fixEslint();

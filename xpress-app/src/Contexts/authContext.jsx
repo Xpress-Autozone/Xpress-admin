@@ -12,7 +12,7 @@ import {
   getRedirectResult
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
-import { useNavigate } from 'react-router-dom';
+
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../authSlice';
 
