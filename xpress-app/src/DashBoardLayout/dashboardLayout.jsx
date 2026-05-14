@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders } from '../orderSlice';
 
 // Import all your page components
-import { useNotifications } from '../Contexts/NotificationContext';
+
 import LoadingSpinner from '../Components/LoadingSpinner';
 
 // Lazy load all page components

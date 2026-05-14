@@ -27,7 +27,7 @@ const VendorList = ({
   onAddItem,
   onEditItem,
   onDeleteItem,
-  onViewItem,
+
   itemsPerPage = 10,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);

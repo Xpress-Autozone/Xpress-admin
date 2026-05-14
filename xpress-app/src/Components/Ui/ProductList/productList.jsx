@@ -26,7 +26,7 @@ const ProductList = ({
   onAddItem,
   onEditItem,
   onDeleteItem,
-  onViewItem,
+
   itemsPerPage = 10,
   initialFilters = {},
 }) => {
